@@ -5,9 +5,16 @@ namespace XpertStore.Mvc.Data
 {
     public class ApplicationDbContext : IdentityDbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options)
+        protected readonly IConfiguration Configuration;
+
+        public ApplicationDbContext(IConfiguration configuration)
         {
+            Configuration = configuration;
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder options)
+        {
+            options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
         }
     }
 }
