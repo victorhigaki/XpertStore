@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Entities;
+using XpertStore.Mvc.Models;
 
 namespace XpertStore.Mvc.Data
 {
@@ -16,5 +18,7 @@ namespace XpertStore.Mvc.Data
         {
             options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
         }
+        public DbSet<Entities.Categoria> Categoria { get; set; } = default!;
+        public DbSet<XpertStore.Mvc.Models.Produto> Produto { get; set; } = default!;
     }
 }
