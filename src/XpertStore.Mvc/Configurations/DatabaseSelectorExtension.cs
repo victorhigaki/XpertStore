@@ -10,17 +10,13 @@ namespace XpertStore.Mvc.Configurations
         {
             if (builder.Environment.IsDevelopment())
             {
-                var connectionString = builder.Configuration.GetConnectionString("DefaultConnectionLite") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-                builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseSqlite(connectionString));
+                builder.Services.AddDbContext<ApplicationDbContext, SqliteDbContext>();
                 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                    .AddEntityFrameworkStores<ApplicationDbContext>();
+                    .AddEntityFrameworkStores<SqliteDbContext>();
             }
             else
             {
-                var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-                builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseSqlServer(connectionString));
+                builder.Services.AddDbContext<ApplicationDbContext>();
                 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                     .AddEntityFrameworkStores<ApplicationDbContext>();
             }
