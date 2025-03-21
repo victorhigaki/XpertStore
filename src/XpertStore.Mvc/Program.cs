@@ -1,35 +1,10 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using XpertStore.Mvc.Data;
+using XpertStore.Mvc.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-
-if (builder.Environment.IsDevelopment())
-{
-    builder.Services.AddDbContext<SqliteDbContext>(options =>
-        options.UseSqlite(connectionString));
-}
-else
-{
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseSqlServer(connectionString));
-}
+builder.AddDatabaseSelector();
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
-if (builder.Environment.IsDevelopment())
-{
-    builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-        .AddEntityFrameworkStores<SqliteDbContext>();
-}
-else
-{
-    builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-        .AddEntityFrameworkStores<ApplicationDbContext>();
-}
 
 builder.Services.AddControllersWithViews();
 
@@ -58,5 +33,7 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
+
+app.UseDbMigrationHelper();
 
 app.Run();

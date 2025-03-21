@@ -9,7 +9,7 @@ namespace XpertStore.Mvc.Data
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
             // connect to sqlite database
-            options.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
+            options.UseSqlite(Configuration.GetConnectionString("DefaultConnectionLite"));
         }
     }
 }
