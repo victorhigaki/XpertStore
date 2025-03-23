@@ -1,33 +1,32 @@
 ﻿@model XpertStore.Entities.Models.Produto
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Adicionar Produto";
 }
 
-<h1>Create</h1>
-
-<h4>Produto</h4>
+<h1>@ViewData["Title"]</h1>
 <hr />
+
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="Nome" class="control-label"></label>
                 <input asp-for="Nome" class="form-control" />
                 <span asp-validation-for="Nome" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="Descricao" class="control-label"></label>
                 <input asp-for="Descricao" class="form-control" />
                 <span asp-validation-for="Descricao" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="Imagem" class="control-label"></label>
                 <input asp-for="Imagem" class="form-control" />
                 <span asp-validation-for="Imagem" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="Preco" class="control-label"></label>
                 <input asp-for="Preco" class="form-control" />
                 <span asp-validation-for="Preco" class="text-danger"></span>
@@ -37,17 +36,24 @@
                     <input class="form-check-input" asp-for="Estoque" /> @Html.DisplayNameFor(model => model.Estoque)
                 </label>
             </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="CategoriaId" class="control-label"></label>
+                <select class="form-control" asp-for="CategoriaId" asp-items="@ViewBag.Categorias">
+                    <option value="null" selected disabled>Selecione uma Opção</option>
+                </select>
+            </div>
+
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> Adicionar</button>
+                <a class="btn btn-outline-light" asp-action="Index">Voltar</a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

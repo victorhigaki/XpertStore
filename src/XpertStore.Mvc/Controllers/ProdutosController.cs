@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using XpertStore.Entities.Models;
@@ -46,6 +42,13 @@ namespace XpertStore.Mvc.Controllers
         // GET: Produtos/Create
         public IActionResult Create()
         {
+            ViewBag.Categorias = _context.Categoria
+                .Select(c => new SelectListItem()
+                {
+                    Text = c.Nome,
+                    Value = c.Id.ToString()
+                })
+                .ToList();
             return View();
         }
 
@@ -54,7 +57,7 @@ namespace XpertStore.Mvc.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome,Descricao,Imagem,Preco,Estoque")] Produto produto)
+        public async Task<IActionResult> Create([Bind("Id,Nome,Descricao,Imagem,Preco,Estoque,CategoriaId")] Produto produto)
         {
             if (ModelState.IsValid)
             {
