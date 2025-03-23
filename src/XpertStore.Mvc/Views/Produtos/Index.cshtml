@@ -27,6 +27,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.Estoque)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Categoria.Nome)
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -48,6 +51,9 @@
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Estoque)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Categoria.Nome)
                 </td>
                 <td>
                     <a class="btn btn-info" asp-action="Details" asp-route-id="@item.Id"><i class="fa fa-search"></i> Visualizar</a>

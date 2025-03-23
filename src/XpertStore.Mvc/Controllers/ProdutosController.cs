@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using XpertStore.Entities.Models;
 using XpertStore.Mvc.Data;
+using XpertStore.Mvc.Models;
 
 namespace XpertStore.Mvc.Controllers
 {
@@ -18,7 +19,9 @@ namespace XpertStore.Mvc.Controllers
         // GET: Produtos
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Produto.ToListAsync());
+            List<Produto> produtos = await _context.Produto.ToListAsync();
+            produtos.ForEach(produto => produto.Categoria = _context.Categoria.First(c => c.Id == produto.CategoriaId));
+            return base.View(produtos);
         }
 
         // GET: Produtos/Details/5
@@ -42,6 +45,12 @@ namespace XpertStore.Mvc.Controllers
         // GET: Produtos/Create
         public IActionResult Create()
         {
+            ObterCategoriasViewBag();
+            return View();
+        }
+
+        private void ObterCategoriasViewBag()
+        {
             ViewBag.Categorias = _context.Categoria
                 .Select(c => new SelectListItem()
                 {
@@ -49,7 +58,6 @@ namespace XpertStore.Mvc.Controllers
                     Value = c.Id.ToString()
                 })
                 .ToList();
-            return View();
         }
 
         // POST: Produtos/Create
@@ -57,16 +65,31 @@ namespace XpertStore.Mvc.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome,Descricao,Imagem,Preco,Estoque,CategoriaId")] Produto produto)
+        public async Task<IActionResult> Create([Bind("Nome,Descricao,Preco,Imagem,Estoque,CategoriaId")] ProdutoViewModel produtoViewModel)
         {
             if (ModelState.IsValid)
             {
-                produto.Id = Guid.NewGuid();
+                Produto produto = MapProduto(produtoViewModel);
+
                 _context.Add(produto);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(produto);
+            return View(produtoViewModel);
+        }
+
+        private Produto MapProduto(ProdutoViewModel produtoViewModel)
+        {
+            return new Produto
+            {
+                Id = Guid.NewGuid(),
+                Nome = produtoViewModel.Nome,
+                Descricao = produtoViewModel.Descricao,
+                Imagem = produtoViewModel.Imagem,
+                Preco = produtoViewModel.Preco,
+                Estoque = produtoViewModel.Estoque,
+                Categoria = _context.Categoria.First(c => c.Id == produtoViewModel.CategoriaId)
+            };
         }
 
         // GET: Produtos/Edit/5
@@ -82,6 +105,7 @@ namespace XpertStore.Mvc.Controllers
             {
                 return NotFound();
             }
+            ObterCategoriasViewBag();
             return View(produto);
         }
 
@@ -90,23 +114,20 @@ namespace XpertStore.Mvc.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Nome,Descricao,Imagem,Preco,Estoque")] Produto produto)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Nome,Descricao,Imagem,Preco,Estoque,CategoriaId")] ProdutoViewModel produtoViewModel)
         {
-            if (id != produto.Id)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var produto = MapProduto(produtoViewModel);
+                    produto.Id = id;
                     _context.Update(produto);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProdutoExists(produto.Id))
+                    if (!ProdutoExists(id))
                     {
                         return NotFound();
                     }
@@ -117,7 +138,7 @@ namespace XpertStore.Mvc.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(produto);
+            return View(produtoViewModel);
         }
 
         // GET: Produtos/Delete/5

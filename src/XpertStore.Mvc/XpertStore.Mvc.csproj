@@ -23,8 +23,8 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\XpertStore.Entities\XpertStore.Entities.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\XpertStore.Entities\XpertStore.Entities.csproj" />
+	</ItemGroup>
 
 </Project>
