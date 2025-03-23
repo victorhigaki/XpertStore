@@ -252,8 +252,8 @@ namespace XpertStore.Mvc.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("Estoque")
-                        .HasColumnType("bit");
+                    b.Property<int>("Estoque")
+                        .HasColumnType("int");
 
                     b.Property<string>("Imagem")
                         .IsRequired()
@@ -266,11 +266,27 @@ namespace XpertStore.Mvc.Data.Migrations
                     b.Property<decimal>("Preco")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<Guid>("VendedorId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CategoriaId");
 
+                    b.HasIndex("VendedorId");
+
                     b.ToTable("Produto");
+                });
+
+            modelBuilder.Entity("XpertStore.Entities.Models.Vendedor", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Vendedor");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -332,7 +348,15 @@ namespace XpertStore.Mvc.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("XpertStore.Entities.Models.Vendedor", "Vendedor")
+                        .WithMany()
+                        .HasForeignKey("VendedorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Categoria");
+
+                    b.Navigation("Vendedor");
                 });
 #pragma warning restore 612, 618
         }

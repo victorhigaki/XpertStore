@@ -7,7 +7,11 @@ public class Produto
     public string Descricao { get; set; }
     public string Imagem { get; set; }
     public decimal Preco { get; set; }
-    public bool Estoque { get; set; }
+    public int Estoque { get; set; }
+
     public Guid CategoriaId { get; set; }
     public Categoria Categoria { get; set; }
+
+    public Guid VendedorId { get; set; }
+    public Vendedor Vendedor { get; set; }
 }
