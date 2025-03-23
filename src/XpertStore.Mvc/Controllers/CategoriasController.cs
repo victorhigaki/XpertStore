@@ -138,6 +138,12 @@ public class CategoriasController : Controller
     public async Task<IActionResult> DeleteConfirmed(Guid id)
     {
         var categoria = await _context.Categoria.FindAsync(id);
+
+        if (await CategoriaEmUso(id))
+        {
+            return BadRequest("Categoria com Produto associado");
+        }
+
         if (categoria != null)
         {
             _context.Categoria.Remove(categoria);
@@ -150,5 +156,10 @@ public class CategoriasController : Controller
     private bool CategoriaExists(Guid id)
     {
         return _context.Categoria.Any(e => e.Id == id);
+    }
+
+    private async Task<bool> CategoriaEmUso(Guid categoriaId)
+    {
+        return await _context.Produto.AnyAsync(p => p.CategoriaId == categoriaId);
     }
 }
