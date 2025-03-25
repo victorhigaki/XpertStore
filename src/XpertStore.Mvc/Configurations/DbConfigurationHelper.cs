@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using XpertStore.Entities.Models;
 using XpertStore.Mvc.Data;
 
 namespace XpertStore.Mvc.Configurations
@@ -40,10 +41,10 @@ namespace XpertStore.Mvc.Configurations
         {
             if (contextId.Users.Any())
                 return;
-
+            var userId = Guid.NewGuid();
             await contextId.Users.AddAsync(new IdentityUser
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = userId.ToString(),
                 UserName = "teste@teste.com",
                 NormalizedUserName = "TESTE@TESTE.COM",
                 Email = "teste@teste.com",
@@ -55,6 +56,38 @@ namespace XpertStore.Mvc.Configurations
                 ConcurrencyStamp = Guid.NewGuid().ToString(),
                 EmailConfirmed = true,
                 SecurityStamp = Guid.NewGuid().ToString()
+            });
+
+            await contextId.AddAsync(new Vendedor
+            {
+                Id = userId
+            });
+
+            var categoriaId = Guid.NewGuid();
+
+            await contextId.AddRangeAsync([
+                new Categoria {
+                    Id = categoriaId,
+                    Nome = "Categoria 1",
+                    Descricao = "Descricao Categoria 1"
+                },
+                new Categoria {
+                    Id = Guid.NewGuid(),
+                    Nome = "Categoria 2",
+                    Descricao = "Descricao Categoria 2"
+                }
+            ]);
+
+            await contextId.AddAsync(new Produto
+            {
+                Id = Guid.NewGuid(),
+                Nome = "Nome Teste",
+                Descricao = "Descricao Teste",
+                Imagem = "",
+                Preco = 456,
+                Estoque = 123,
+                CategoriaId = categoriaId,
+                VendedorId = userId,
             });
 
             await contextId.SaveChangesAsync();
