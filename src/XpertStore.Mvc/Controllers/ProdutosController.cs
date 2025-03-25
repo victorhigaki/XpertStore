@@ -88,6 +88,8 @@ public class ProdutosController : Controller
 
     private Produto MapProduto(ProdutoViewModel produtoViewModel)
     {
+        var userId = new Guid(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
         return new Produto
         {
             Id = Guid.NewGuid(),
@@ -96,6 +98,7 @@ public class ProdutosController : Controller
             Preco = produtoViewModel.Preco,
             Estoque = produtoViewModel.Estoque,
             Categoria = _context.Categoria.First(c => c.Id == produtoViewModel.CategoriaId),
+            Vendedor = _context.Vendedor.First(v => v.Id == userId),
         };
     }
 
@@ -215,6 +218,9 @@ public class ProdutosController : Controller
         if (arquivo.Length <= 0) return false;
 
         var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images", imgPrefixo + arquivo.FileName);
+
+        if (!Directory.Exists(Directory.GetCurrentDirectory() + "/wwwroot/images"))
+            Directory.CreateDirectory(Directory.GetCurrentDirectory() + "/wwwroot/images");
 
         if (System.IO.File.Exists(path))
         {
