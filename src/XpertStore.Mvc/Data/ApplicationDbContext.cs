@@ -20,4 +20,5 @@ public class ApplicationDbContext : IdentityDbContext
 
     public DbSet<Categoria> Categoria { get; set; } = default!;
     public DbSet<Produto> Produto { get; set; } = default!;
+    public DbSet<Vendedor> Vendedor { get; set; } = default!;
 }
