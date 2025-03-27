@@ -1,4 +1,4 @@
-﻿using XpertStore.Domain.Entities.Base;
+using XpertStore.Domain.Entities.Base;
 
 namespace XpertStore.Domain.Entities;
 
