@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using XpertStore.Data.Data;
 using XpertStore.Entities.Models;
-using XpertStore.Mvc.Data;
 using XpertStore.Mvc.Models;
 
 namespace XpertStore.Mvc.Controllers;

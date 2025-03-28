@@ -1,4 +1,4 @@
-using XpertStore.Mvc.Configurations;
+using XpertStore.Data.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 

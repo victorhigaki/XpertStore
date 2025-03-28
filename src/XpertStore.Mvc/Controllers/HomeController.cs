@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
+using XpertStore.Data.Data;
 using XpertStore.Mvc.Data;
 using XpertStore.Mvc.Models;
 

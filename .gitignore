@@ -362,7 +362,7 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-/src/XpertStore.Mvc/XpertStore.db
-/src/XpertStore.Mvc/XpertStore.db-shm
-/src/XpertStore.Mvc/XpertStore.db-wal
+/src/XpertStore.Data/XpertStore.db
+/src/XpertStore.Data/XpertStore.db-shm
+/src/XpertStore.Data/XpertStore.db-wal
 /src/XpertStore.Mvc/wwwroot/images
