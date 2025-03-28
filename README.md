@@ -1,21 +1,20 @@
-# **[Título do Projeto] - Aplicação de Blog Simples com MVC e API RESTful**
+# **XpertStore - Aplicação de Gestão de Mini Loja Virtual com MVC e API RESTful**
 
 ## **1. Apresentação**
 
-Bem-vindo ao repositório do projeto **[Título do Projeto]**. Este projeto é uma entrega do MBA DevXpert Full Stack .NET e é referente ao módulo **Introdução ao Desenvolvimento ASP.NET Core**.
-O objetivo principal desenvolver uma aplicação de blog que permite aos usuários criar, editar, visualizar e excluir posts e comentários, tanto através de uma interface web utilizando MVC quanto através de uma API RESTful.
+Bem-vindo ao repositório do projeto **XpertStore**. Este projeto é uma entrega do MBA DevXpert Full Stack .NET e é referente ao módulo **Introdução ao Desenvolvimento ASP.NET Core**.
+O objetivo principal desenvolver uma aplicação de Gestão de Mini Loja Virtual que permite aos usuários criar, editar, visualizar e excluir posts e comentários, tanto através de uma interface web utilizando MVC quanto através de uma API RESTful.
 Descreva livremente mais detalhes do seu projeto aqui.
 
 ### **Autor(es)**
-- **Nome 1**
-- **Nome 2**
+- **Victor Higaki**
 
 ## **2. Proposta do Projeto**
 
 O projeto consiste em:
 
-- **Aplicação MVC:** Interface web para interação com o blog.
-- **API RESTful:** Exposição dos recursos do blog para integração com outras aplicações ou desenvolvimento de front-ends alternativos.
+- **Aplicação MVC:** Interface web para interação com a Gestão de Mini Loja Virtual.
+- **API RESTful:** Exposição dos recursos da Gestão de Mini Loja Virtual para integração com outras aplicações ou desenvolvimento de front-ends alternativos.
 - **Autenticação e Autorização:** Implementação de controle de acesso, diferenciando administradores e usuários comuns.
 - **Acesso a Dados:** Implementação de acesso ao banco de dados através de ORM.
 
@@ -41,16 +40,17 @@ A estrutura do projeto é organizada da seguinte forma:
 
 
 - src/
-  - Blog.Web/ - Projeto MVC
-  - Blog.Api/ - API RESTful
-  - Blog.Data/ - Modelos de Dados e Configuração do EF Core
+  - XpertStore.Mvc/ - Projeto MVC
+  - XpertStore.Api/ - API RESTful
+  - XpertStore.Data/ - Configuração do EF Core
+  - XpertStore.Entity/ - Modelos de Dados
 - README.md - Arquivo de Documentação do Projeto
 - FEEDBACK.md - Arquivo para Consolidação dos Feedbacks
 - .gitignore - Arquivo de Ignoração do Git
 
 ## **5. Funcionalidades Implementadas**
 
-- **CRUD para Posts e Comentários:** Permite criar, editar, visualizar e excluir posts e comentários.
+- **CRUD para Posts e Comentários:** Permite criar, editar, visualizar e excluir categoria e produto.
 - **Autenticação e Autorização:** Diferenciação entre usuários comuns e administradores.
 - **API RESTful:** Exposição de endpoints para operações CRUD via API.
 - **Documentação da API:** Documentação automática dos endpoints da API utilizando Swagger.
@@ -60,27 +60,27 @@ A estrutura do projeto é organizada da seguinte forma:
 ### **Pré-requisitos**
 
 - .NET SDK 8.0 ou superior
-- SQL Server
+- SQLite / SQL Server
 - Visual Studio 2022 ou superior (ou qualquer IDE de sua preferência)
 - Git
 
 ### **Passos para Execução**
 
 1. **Clone o Repositório:**
-   - `git clone https://github.com/seu-usuario/nome-do-repositorio.git`
-   - `cd nome-do-repositorio`
+   - `git clone https://github.com/victorhigaki/XpertStore.git`
+   - `cd XpertStore`
 
 2. **Configuração do Banco de Dados:**
    - No arquivo `appsettings.json`, configure a string de conexão do SQL Server.
    - Rode o projeto para que a configuração do Seed crie o banco e popule com os dados básicos
 
 3. **Executar a Aplicação MVC:**
-   - `cd src/Blog.Mvc/`
+   - `cd src/XpertStore.Mvc/`
    - `dotnet run`
    - Acesse a aplicação em: http://localhost:5000
 
 4. **Executar a API:**
-   - `cd src/Blog.Api/`
+   - `cd src/XpertStore.Api/`
    - `dotnet run`
    - Acesse a documentação da API em: http://localhost:5001/swagger
 
