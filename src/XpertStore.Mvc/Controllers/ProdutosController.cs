@@ -22,8 +22,8 @@ public class ProdutosController : Controller
     // GET: Produtos
     public async Task<IActionResult> Index()
     {
-        List<Produto> produtos = await _context.Produto.ToListAsync();
-        produtos.ForEach(produto => produto.Categoria = _context.Categoria.First(c => c.Id == produto.CategoriaId));
+        List<Produto> produtos = await _context.Produtos.ToListAsync();
+        produtos.ForEach(produto => produto.Categoria = _context.Categorias.First(c => c.Id == produto.CategoriaId));
         return base.View(produtos);
     }
 
@@ -35,7 +35,7 @@ public class ProdutosController : Controller
             return NotFound();
         }
 
-        var produto = await _context.Produto
+        var produto = await _context.Produtos
             .FirstOrDefaultAsync(m => m.Id == id);
         if (produto == null)
         {
@@ -54,7 +54,7 @@ public class ProdutosController : Controller
 
     private void ObterCategoriasViewBag()
     {
-        ViewBag.Categorias = _context.Categoria
+        ViewBag.Categorias = _context.Categorias
             .Select(c => new SelectListItem()
             {
                 Text = c.Nome,
@@ -98,8 +98,8 @@ public class ProdutosController : Controller
             Descricao = produtoViewModel.Descricao,
             Preco = produtoViewModel.Preco,
             Estoque = produtoViewModel.Estoque,
-            Categoria = _context.Categoria.First(c => c.Id == produtoViewModel.CategoriaId),
-            Vendedor = _context.Vendedor.First(v => v.Id == userId),
+            Categoria = _context.Categorias.First(c => c.Id == produtoViewModel.CategoriaId),
+            Vendedor = _context.Vendedores.First(v => v.Id == userId),
         };
     }
 
@@ -111,7 +111,7 @@ public class ProdutosController : Controller
             return NotFound();
         }
 
-        var produto = await _context.Produto.FindAsync(id);
+        var produto = await _context.Produtos.FindAsync(id);
         if (produto == null)
         {
             return NotFound();
@@ -184,7 +184,7 @@ public class ProdutosController : Controller
             return NotFound();
         }
 
-        var produto = await _context.Produto
+        var produto = await _context.Produtos
             .FirstOrDefaultAsync(m => m.Id == id);
         if (produto == null)
         {
@@ -199,10 +199,10 @@ public class ProdutosController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(Guid id)
     {
-        var produto = await _context.Produto.FindAsync(id);
+        var produto = await _context.Produtos.FindAsync(id);
         if (produto != null)
         {
-            _context.Produto.Remove(produto);
+            _context.Produtos.Remove(produto);
         }
 
         await _context.SaveChangesAsync();
@@ -211,7 +211,7 @@ public class ProdutosController : Controller
 
     private bool ProdutoExists(Guid id)
     {
-        return _context.Produto.Any(e => e.Id == id);
+        return _context.Produtos.Any(e => e.Id == id);
     }
 
     private async Task<bool> UploadArquivo(IFormFile arquivo, string imgPrefixo)

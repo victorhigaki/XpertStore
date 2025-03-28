@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using XpertStore.Entities.Models;
 
-namespace XpertStore.Mvc.Data;
+namespace XpertStore.Data.Data;
 
 public class ApplicationDbContext : IdentityDbContext
 {
@@ -15,7 +16,8 @@ public class ApplicationDbContext : IdentityDbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
-        options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+        options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), 
+            x => x.MigrationsAssembly("XpertStore.Data"));
     }
 
     public DbSet<Categoria> Categorias { get; set; }

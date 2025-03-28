@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
-namespace XpertStore.Mvc.Data;
+namespace XpertStore.Data.Data;
 
 public class SqliteDbContext : ApplicationDbContext
 {
@@ -8,7 +9,7 @@ public class SqliteDbContext : ApplicationDbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
-        // connect to sqlite database
-        options.UseSqlite(Configuration.GetConnectionString("DefaultConnectionLite"));
+        options.UseSqlite(Configuration.GetConnectionString("DefaultConnectionLite"), 
+            x => x.MigrationsAssembly("XpertStore.Data"));
     }
 }

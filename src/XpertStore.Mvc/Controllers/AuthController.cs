@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using XpertStore.Entities.Models;
 using XpertStore.Mvc.Data;
 using XpertStore.Mvc.Models;
@@ -55,7 +54,7 @@ public class AuthController : Controller
     private async Task AddVendedor(IdentityUser user)
     {
         var userId = await _userManager.GetUserIdAsync(user);
-        await _context.Vendedor.AddAsync(new Vendedor { Id = new Guid(userId) });
+        await _context.Vendedores.AddAsync(new Vendedor { Id = new Guid(userId) });
         await _context.SaveChangesAsync();
     }
 }

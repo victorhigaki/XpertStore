@@ -19,7 +19,7 @@ public class CategoriasController : Controller
     // GET: Categorias
     public async Task<IActionResult> Index()
     {
-        return View(await _context.Categoria.ToListAsync());
+        return View(await _context.Categorias.ToListAsync());
     }
 
     // GET: Categorias/Details/5
@@ -30,7 +30,7 @@ public class CategoriasController : Controller
             return NotFound();
         }
 
-        var categoria = await _context.Categoria
+        var categoria = await _context.Categorias
             .FirstOrDefaultAsync(m => m.Id == id);
         if (categoria == null)
         {
@@ -71,7 +71,7 @@ public class CategoriasController : Controller
             return NotFound();
         }
 
-        var categoria = await _context.Categoria.FindAsync(id);
+        var categoria = await _context.Categorias.FindAsync(id);
         if (categoria == null)
         {
             return NotFound();
@@ -122,7 +122,7 @@ public class CategoriasController : Controller
             return NotFound();
         }
 
-        var categoria = await _context.Categoria
+        var categoria = await _context.Categorias
             .FirstOrDefaultAsync(m => m.Id == id);
         if (categoria == null)
         {
@@ -137,7 +137,7 @@ public class CategoriasController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(Guid id)
     {
-        var categoria = await _context.Categoria.FindAsync(id);
+        var categoria = await _context.Categorias.FindAsync(id);
 
         if (await CategoriaEmUso(id))
         {
@@ -146,7 +146,7 @@ public class CategoriasController : Controller
 
         if (categoria != null)
         {
-            _context.Categoria.Remove(categoria);
+            _context.Categorias.Remove(categoria);
         }
 
         await _context.SaveChangesAsync();
@@ -155,11 +155,11 @@ public class CategoriasController : Controller
 
     private bool CategoriaExists(Guid id)
     {
-        return _context.Categoria.Any(e => e.Id == id);
+        return _context.Categorias.Any(e => e.Id == id);
     }
 
     private async Task<bool> CategoriaEmUso(Guid categoriaId)
     {
-        return await _context.Produto.AnyAsync(p => p.CategoriaId == categoriaId);
+        return await _context.Produtos.AnyAsync(p => p.CategoriaId == categoriaId);
     }
 }

@@ -129,7 +129,7 @@ namespace XpertStore.Mvc.Areas.Identity.Pages.Account
                     _logger.LogInformation("User created a new account with password.");
 
                     var userId = await _userManager.GetUserIdAsync(user);
-                    _context.Vendedor.Add(new Vendedor { Id = new Guid(userId) });
+                    _context.Vendedores.Add(new Vendedor { Id = new Guid(userId) });
                     _context.SaveChanges();
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));

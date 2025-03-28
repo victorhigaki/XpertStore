@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
-using XpertStore.Mvc.Data;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using XpertStore.Data.Data;
 
-namespace XpertStore.Mvc.Configurations;
+namespace XpertStore.Data.Configurations;
 
 public static class DatabaseSelectorExtension
 {

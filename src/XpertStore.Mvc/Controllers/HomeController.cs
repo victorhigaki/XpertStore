@@ -19,7 +19,7 @@ namespace XpertStore.Mvc.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var produtos = await _context.Produto.ToListAsync();
+            var produtos = await _context.Produtos.ToListAsync();
             List<ProdutoHomeViewModel> produtoViewModel = [];
             foreach (var produto in produtos)
             {
