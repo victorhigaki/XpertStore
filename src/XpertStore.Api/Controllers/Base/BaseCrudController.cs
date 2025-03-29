@@ -5,10 +5,7 @@ using XpertStore.Entities.Models;
 
 namespace XpertStore.Api.Controllers.Base;
 
-
-[ApiController]
-[Route("api/[controller]")]
-public class BaseCrudController<T> : ControllerBase where T : BaseEntity
+public class BaseCrudController<T> : BaseApiController where T : BaseEntity
 {
     private readonly ApplicationDbContext _context;
 

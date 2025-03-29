@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using XpertStore.Api.Controllers.Base;
 using XpertStore.Data.Data;
@@ -6,6 +7,7 @@ using XpertStore.Entities.Models;
 
 namespace XpertStore.Api.Controllers;
 
+[Authorize]
 public class CategoriasController : BaseCrudController<Categoria>
 {
     private readonly ApplicationDbContext _context;
@@ -19,7 +21,7 @@ public class CategoriasController : BaseCrudController<Categoria>
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesDefaultResponseType]
-    public async Task<IActionResult> Delete(Guid id)
+    public override async Task<IActionResult> Delete(Guid id)
     {
         if (_context.Categorias == null)
         {

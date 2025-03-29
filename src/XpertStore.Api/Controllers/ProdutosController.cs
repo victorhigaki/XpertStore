@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using XpertStore.Data.Data;
 using XpertStore.Entities.Models;
 
 namespace XpertStore.Api.Controllers;
 
-
+[Authorize]
 [ApiController]
 [Route("api/produtos")]
 public class ProdutosController : ControllerBase
