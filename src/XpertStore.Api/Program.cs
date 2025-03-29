@@ -5,11 +5,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddDatabaseSelector();
 
-builder.Services.AddControllers();
-
 builder
+    .AddApiConfig()
     .AddCorsConfig()
-    .AddSwaggerConfig();
+    .AddSwaggerConfig()
+    .AddIdentityConfig();
 
 var app = builder.Build();
 
