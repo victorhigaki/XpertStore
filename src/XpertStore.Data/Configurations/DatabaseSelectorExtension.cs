@@ -13,13 +13,16 @@ public static class DatabaseSelectorExtension
         if (builder.Environment.IsDevelopment())
         {
             builder.Services.AddDbContext<ApplicationDbContext, SqliteDbContext>();
-            builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<SqliteDbContext>();
+
         }
         else
         {
             builder.Services.AddDbContext<ApplicationDbContext>();
-            builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
         }
         return builder;

@@ -1,9 +1,7 @@
 ﻿using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using XpertStore.Api.Models;
-using XpertStore.Data.Data;
 
 namespace XpertStore.Api.Configuration;
 
@@ -11,11 +9,6 @@ public static class IdentityConfig
 {
     public static WebApplicationBuilder AddIdentityConfig(this WebApplicationBuilder builder)
     {
-        builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-                .AddRoles<IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>();
-
-        // Pegando o Token e gerando a chave encodada
         var JwtSettingsSection = builder.Configuration.GetSection("JwtSettings");
         builder.Services.Configure<JwtSettings>(JwtSettingsSection);
 

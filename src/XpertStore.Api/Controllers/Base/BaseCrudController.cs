@@ -113,7 +113,7 @@ public class BaseCrudController<T> : ControllerBase where T : BaseEntity
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesDefaultResponseType]
-    public async Task<IActionResult> Delete(Guid id)
+    public virtual async Task<IActionResult> Delete(Guid id)
     {
         if (_context.Set<T>() == null)
         {
