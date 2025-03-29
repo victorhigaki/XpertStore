@@ -7,7 +7,9 @@ builder.AddDatabaseSelector();
 
 builder.Services.AddControllers();
 
-builder.AddSwaggerConfig();
+builder
+    .AddCorsConfig()
+    .AddSwaggerConfig();
 
 var app = builder.Build();
 
@@ -16,6 +18,11 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseCors("Development");
+}
+else
+{
+    app.UseCors("Production");
 }
 
 app.UseHttpsRedirection();
