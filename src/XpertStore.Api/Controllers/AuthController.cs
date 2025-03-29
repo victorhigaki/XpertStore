@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -9,6 +10,8 @@ using System.Security.Claims;
 using System.Text;
 using XpertStore.Api.Controllers.Base;
 using XpertStore.Api.Models;
+using XpertStore.Data.Data;
+using XpertStore.Entities.Models;
 
 namespace XpertStore.Api.Controllers;
 
@@ -18,34 +21,38 @@ public class AuthController : BaseApiController
     private readonly SignInManager<IdentityUser> _signInManager;
     private readonly UserManager<IdentityUser> _userManager;
     private readonly JwtSettings _jwtSettings;
+    private readonly ApplicationDbContext _context;
 
     public AuthController(SignInManager<IdentityUser> signInManager,
                           UserManager<IdentityUser> userManager,
-                          IOptions<JwtSettings> jwtSettings)
+                          IOptions<JwtSettings> jwtSettings,
+                          ApplicationDbContext context)
     {
         _signInManager = signInManager;
         _userManager = userManager;
         _jwtSettings = jwtSettings.Value;
+        _context = context;
     }
 
     [HttpPost("registrar")]
-    public async Task<IActionResult> Registrar(RegisterUserViewModel registerUser)
+    public async Task<IActionResult> Registrar(RegisterUserViewModel registrarUsuario)
     {
         if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
         var user = new IdentityUser
         {
-            UserName = registerUser.Email,
-            Email = registerUser.Email,
+            UserName = registrarUsuario.Email,
+            Email = registrarUsuario.Email,
             EmailConfirmed = true
         };
 
-        var result = await _userManager.CreateAsync(user, registerUser.Password);
+        var result = await _userManager.CreateAsync(user, registrarUsuario.Password);
 
         if (result.Succeeded)
         {
-            await _signInManager.SignInAsync(user, false);
-            return Ok(await GerarJwt(registerUser.Email));
+            await AddVendedor(user);
+            await _signInManager.SignInAsync(user, isPersistent: false);
+            return Ok(await GerarJwt(registrarUsuario.Email));
         }
 
         return Problem("Falha ao registrar o usuário");
@@ -96,5 +103,12 @@ public class AuthController : BaseApiController
         var encodedToken = tokenHandler.WriteToken(token);
 
         return encodedToken;
+    }
+
+    private async Task AddVendedor(IdentityUser user)
+    {
+        var userId = await _userManager.GetUserIdAsync(user);
+        await _context.Vendedores.AddAsync(new Vendedor { Id = new Guid(userId) });
+        await _context.SaveChangesAsync();
     }
 }
