@@ -8,7 +8,7 @@ namespace XpertStore.Data.Configurations;
 
 public static class DatabaseSelectorExtension
 {
-    public static void AddDatabaseSelector(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder AddDatabaseSelector(this WebApplicationBuilder builder)
     {
         if (builder.Environment.IsDevelopment())
         {
@@ -22,5 +22,6 @@ public static class DatabaseSelectorExtension
             builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
         }
+        return builder;
     }
 }
