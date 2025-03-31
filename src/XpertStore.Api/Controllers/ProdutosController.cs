@@ -18,6 +18,7 @@ public class ProdutosController : ControllerBase
         _context = context;
     }
 
+    [AllowAnonymous]
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
