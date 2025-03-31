@@ -1,10 +1,7 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.AspNetCore.Identity;
 using XpertStore.Data.Data;
 
-namespace XpertStore.Data.Configurations;
+namespace XpertStore.Mvc.Configuration;
 
 public static class DatabaseSelectorExtension
 {
@@ -13,16 +10,13 @@ public static class DatabaseSelectorExtension
         if (builder.Environment.IsDevelopment())
         {
             builder.Services.AddDbContext<ApplicationDbContext, SqliteDbContext>();
-            builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddRoles<IdentityRole>()
+            builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<SqliteDbContext>();
-
         }
         else
         {
             builder.Services.AddDbContext<ApplicationDbContext>();
-            builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddRoles<IdentityRole>()
+            builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
         }
         return builder;
