@@ -30,7 +30,10 @@ public class ProdutosController : ControllerBase
             return NotFound();
         }
 
-        return await _context.Produtos.ToListAsync();
+        return await _context.Produtos
+            .Include(p => p.Categoria)
+            .Include(p => p.Vendedor)
+            .ToListAsync();
     }
 
     [HttpGet("{id:int}")]
