@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using XpertStore.Business.Services;
+using XpertStore.Business.Services.Interfaces;
 using XpertStore.Data.Data;
 using XpertStore.Entities.Models;
 using XpertStore.Mvc.Models;
@@ -13,21 +15,26 @@ namespace XpertStore.Mvc.Controllers;
 public class ProdutosController : Controller
 {
     private readonly ApplicationDbContext _context;
+    private readonly IProdutoService _produtoService;
+    private readonly IUserService _userService;
 
-    public ProdutosController(ApplicationDbContext context)
+    public ProdutosController(
+        ApplicationDbContext context,
+        IProdutoService produtoService,
+        IUserService userService)
     {
         _context = context;
+        _produtoService = produtoService;
+        _userService = userService;
     }
 
-    // GET: Produtos
     public async Task<IActionResult> Index()
     {
-        List<Produto> produtos = await _context.Produtos.ToListAsync();
-        produtos.ForEach(produto => produto.Categoria = _context.Categorias.First(c => c.Id == produto.CategoriaId));
+        var user = await _userService.GetUserAsync(User);
+        var produtos = await _produtoService.Get(new Guid(user.Id));
         return base.View(produtos);
     }
 
-    // GET: Produtos/Details/5
     public async Task<IActionResult> Details(Guid? id)
     {
         if (id == null)
@@ -45,7 +52,6 @@ public class ProdutosController : Controller
         return View(produto);
     }
 
-    // GET: Produtos/Create
     public IActionResult Create()
     {
         ObterCategoriasViewBag();
@@ -63,9 +69,6 @@ public class ProdutosController : Controller
             .ToList();
     }
 
-    // POST: Produtos/Create
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("Nome,Descricao,ImagemUpload,Preco,Estoque,CategoriaId")] ProdutoViewModel produtoViewModel)
@@ -103,7 +106,6 @@ public class ProdutosController : Controller
         };
     }
 
-    // GET: Produtos/Edit/5
     public async Task<IActionResult> Edit(Guid? id)
     {
         if (id == null)
@@ -132,9 +134,6 @@ public class ProdutosController : Controller
         return View(produtoViewModel);
     }
 
-    // POST: Produtos/Edit/5
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(Guid id, [Bind("Nome,Descricao,ImagemUpload,Preco,Estoque,CategoriaId")] ProdutoViewModel produtoViewModel)
@@ -176,7 +175,6 @@ public class ProdutosController : Controller
         return View(produtoViewModel);
     }
 
-    // GET: Produtos/Delete/5
     public async Task<IActionResult> Delete(Guid? id)
     {
         if (id == null)
@@ -194,7 +192,6 @@ public class ProdutosController : Controller
         return View(produto);
     }
 
-    // POST: Produtos/Delete/5
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(Guid id)

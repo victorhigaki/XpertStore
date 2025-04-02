@@ -1,8 +1,6 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
-using XpertStore.Data.Data;
-using XpertStore.Mvc.Data;
+using Microsoft.AspNetCore.Mvc;
+using XpertStore.Business.Services.Interfaces;
 using XpertStore.Mvc.Models;
 
 namespace XpertStore.Mvc.Controllers
@@ -10,17 +8,23 @@ namespace XpertStore.Mvc.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly ApplicationDbContext _context;
+        private readonly IProdutoService _produtoService;
+        private readonly IUserService _userService;
 
-        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
+        public HomeController(
+            ILogger<HomeController> logger,
+            IProdutoService produtoService,
+            IUserService userService)
         {
             _logger = logger;
-            _context = context;
+            _produtoService = produtoService;
+            _userService = userService;
         }
-
         public async Task<IActionResult> Index()
         {
-            var produtos = await _context.Produtos.ToListAsync();
+            var user = await _userService.GetUserAsync(User);
+            Guid? userId = user != null ? new Guid(user.Id) : null;
+            var produtos = await _produtoService.Get(userId);
             List<ProdutoHomeViewModel> produtoViewModel = [];
             foreach (var produto in produtos)
             {

@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using XpertStore.Data.Data;
+using XpertStore.Data.Repositories.Interfaces;
 using XpertStore.Entities.Models;
 
 namespace XpertStore.Api.Controllers;
@@ -12,10 +15,13 @@ namespace XpertStore.Api.Controllers;
 public class ProdutosController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
+    private readonly UserManager<IdentityUser> _userManager;
 
-    public ProdutosController(ApplicationDbContext context)
+    public ProdutosController(ApplicationDbContext context,
+        UserManager<IdentityUser> userManager)
     {
         _context = context;
+        _userManager = userManager;
     }
 
     [AllowAnonymous]
@@ -30,10 +36,14 @@ public class ProdutosController : ControllerBase
             return NotFound();
         }
 
-        return await _context.Produtos
+        var user = await GetUser();
+        var produtos = await _context.Produtos
             .Include(p => p.Categoria)
             .Include(p => p.Vendedor)
+            .Where(p => p.VendedorId == new Guid(user.Id))
             .ToListAsync();
+
+        return produtos;
     }
 
     [HttpGet("{id:int}")]
@@ -145,5 +155,11 @@ public class ProdutosController : ControllerBase
     private bool ProdutoExists(Guid id)
     {
         return (_context.Produtos?.Any(e => e.Id == id)).GetValueOrDefault();
+    }
+
+    private async Task<IdentityUser?> GetUser()
+    {
+        var user = await _userManager.FindByEmailAsync(User.FindFirst(ClaimTypes.Name).Value);
+        return user;
     }
 }
