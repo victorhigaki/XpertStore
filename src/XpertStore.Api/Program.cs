@@ -1,7 +1,10 @@
 using XpertStore.Api.Configuration;
 using XpertStore.Data.Configurations;
+using XpertStore.Infra.IoC;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddHttpContextAccessor();
 
 builder
     .AddApiConfig()
@@ -9,6 +12,8 @@ builder
     .AddSwaggerConfig()
     .AddDatabaseSelector()
     .AddIdentityConfig();
+
+builder.Services.ResolveDependencies();
 
 var app = builder.Build();
 

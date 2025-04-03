@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using XpertStore.Application.Models.Base;
 using XpertStore.Data.Data;
 using XpertStore.Entities.Models;
 
@@ -13,9 +16,15 @@ public class ProdutosController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
 
-    public ProdutosController(ApplicationDbContext context)
+    protected Guid? UserId { get; set; } = null;
+
+    public ProdutosController(
+        ApplicationDbContext context,
+        IAppIdentityUser user)
     {
         _context = context;
+
+        if (user.IsAuthenticated()) UserId = user.GetUserId();
     }
 
     [AllowAnonymous]
@@ -50,6 +59,7 @@ public class ProdutosController : ControllerBase
         var produto = await _context.Produtos
                                         .Include(p => p.Categoria)
                                         .Include(p => p.Vendedor)
+                                        .Where(p => p.Vendedor.Id == UserId)
                                         .FirstOrDefaultAsync(p => p.Id == id);
 
         if (produto == null)
@@ -110,6 +120,11 @@ public class ProdutosController : ControllerBase
 
         if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
+        if (produto.Vendedor.Id != UserId)
+        {
+            return Unauthorized();
+        }
+
         _context.Entry(produto).State = EntityState.Modified;
 
         try
@@ -143,6 +158,12 @@ public class ProdutosController : ControllerBase
         }
 
         var produto = await _context.Produtos.FindAsync(id);
+
+
+        if (produto.Vendedor.Id != UserId)
+        {
+            return Unauthorized();
+        }
 
         if (produto == null)
         {
