@@ -161,6 +161,6 @@ public class CategoriasController : Controller
 
     private async Task<bool> CategoriaEmUso(Guid categoriaId)
     {
-        return await _context.Produtos.AnyAsync(p => p.CategoriaId == categoriaId);
+        return await _context.Produtos.AnyAsync(p => p.Categoria.Id == categoriaId);
     }
 }

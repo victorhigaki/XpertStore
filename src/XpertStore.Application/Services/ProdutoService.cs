@@ -24,7 +24,7 @@ public class ProdutoService : IProdutoService
         var produtos = await _context.Produtos
             .Include(p => p.Categoria)
             .Include(p => p.Vendedor)
-            .Where(p => p.VendedorId == userId)
+            .Where(p => p.Vendedor.Id == userId)
             .ToListAsync();
 
         return produtos;

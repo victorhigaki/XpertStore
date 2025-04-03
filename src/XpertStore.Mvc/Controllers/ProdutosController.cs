@@ -126,7 +126,7 @@ public class ProdutosController : Controller
             Imagem = produto.Imagem,
             Preco = produto.Preco,
             Estoque = produto.Estoque,
-            CategoriaId = produto.CategoriaId
+            CategoriaId = produto.Categoria.Id
         };
 
         ObterCategoriasViewBag();

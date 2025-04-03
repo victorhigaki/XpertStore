@@ -22,7 +22,7 @@ internal class ProdutoRepository : IProdutoRepository
             .Include(p => p.Vendedor)
             .ToListAsync();
         if (user != null)
-            produtos.Where(p => p.VendedorId == new Guid(user.Id));
+            produtos.Where(p => p.Vendedor.Id == new Guid(user.Id));
         return produtos;
     }
 }
