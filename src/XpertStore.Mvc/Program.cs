@@ -1,13 +1,17 @@
-using XpertStore.Data.Configurations;
+using XpertStore.Infra.IoC;
 using XpertStore.Mvc.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddHttpContextAccessor();
 
 builder.AddDatabaseSelector();
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddControllersWithViews();
+
+builder.Services.ResolveDependencies();
 
 var app = builder.Build();
 
