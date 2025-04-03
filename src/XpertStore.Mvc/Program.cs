@@ -1,7 +1,6 @@
-using XpertStore.Business.Services;
-using XpertStore.Business.Services.Interfaces;
 using XpertStore.Data.Configurations;
 using XpertStore.Mvc.Configuration;
+using XpertStore.Infra.IoC;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,8 +10,7 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddScoped<IProdutoService, ProdutoService>();
-builder.Services.AddScoped<IUserService, UserService>();
+builder.RegisterServices();
 
 var app = builder.Build();
 

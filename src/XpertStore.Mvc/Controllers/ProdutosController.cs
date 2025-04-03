@@ -1,10 +1,9 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using XpertStore.Business.Services;
-using XpertStore.Business.Services.Interfaces;
+using System.Security.Claims;
+using XpertStore.Application.Services.Interfaces;
 using XpertStore.Data.Data;
 using XpertStore.Entities.Models;
 using XpertStore.Mvc.Models;
@@ -31,7 +30,7 @@ public class ProdutosController : Controller
     public async Task<IActionResult> Index()
     {
         var user = await _userService.GetUserAsync(User);
-        var produtos = await _produtoService.Get(new Guid(user.Id));
+        var produtos = await _produtoService.GetAllAsync(new Guid(user.Id));
         return base.View(produtos);
     }
 

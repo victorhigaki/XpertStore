@@ -1,5 +1,8 @@
 using XpertStore.Api.Configuration;
+using XpertStore.Application.Services;
+using XpertStore.Application.Services.Interfaces;
 using XpertStore.Data.Configurations;
+using XpertStore.Infra.IoC;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +11,8 @@ builder
     .AddCorsConfig()
     .AddSwaggerConfig()
     .AddDatabaseSelector()
-    .AddIdentityConfig();
+    .AddIdentityConfig()
+    .RegisterServices();
 
 var app = builder.Build();
 

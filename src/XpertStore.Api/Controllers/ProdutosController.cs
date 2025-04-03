@@ -1,27 +1,29 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using XpertStore.Application.Services.Interfaces;
 using XpertStore.Data.Data;
-using XpertStore.Data.Repositories.Interfaces;
 using XpertStore.Entities.Models;
 
 namespace XpertStore.Api.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("api/produtos")]
+[Route("api/[controller]")]
 public class ProdutosController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
-    private readonly UserManager<IdentityUser> _userManager;
+    private readonly IProdutoService _produtoService;
+    private readonly IUserService _userService;
 
     public ProdutosController(ApplicationDbContext context,
-        UserManager<IdentityUser> userManager)
+        IProdutoService produtoService,
+        IUserService userService)
     {
         _context = context;
-        _userManager = userManager;
+        _produtoService = produtoService;
+        _userService = userService;
     }
 
     [AllowAnonymous]
@@ -29,21 +31,23 @@ public class ProdutosController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesDefaultResponseType]
-    public async Task<ActionResult<IEnumerable<Produto>>> GetProduto()
+    public async Task<ActionResult<IEnumerable<Produto>>> GetAllAsync()
     {
         if (_context.Produtos == null)
         {
             return NotFound();
         }
 
-        var user = await GetUser();
-        var produtos = await _context.Produtos
-            .Include(p => p.Categoria)
-            .Include(p => p.Vendedor)
-            .Where(p => p.VendedorId == new Guid(user.Id))
-            .ToListAsync();
+        var user = await _userService.GetUserByEmailAsync(User.FindFirst(ClaimTypes.Name).Value);
 
-        return produtos;
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        var produtos = await _produtoService.GetAllAsync(new Guid(user.Id));
+
+        return Ok(produtos);
     }
 
     [HttpGet("{id:int}")]
@@ -80,10 +84,6 @@ public class ProdutosController : ControllerBase
 
         if (!ModelState.IsValid)
         {
-            //return BadRequest(ModelState);
-
-            //return ValidationProblem(ModelState);
-
             return ValidationProblem(new ValidationProblemDetails(ModelState)
             {
                 Title = "Um ou mais erros de validação ocorreram!"
@@ -93,7 +93,7 @@ public class ProdutosController : ControllerBase
         _context.Produtos.Add(produto);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetProduto), new { id = produto.Id }, produto);
+        return CreatedAtAction(nameof(GetAllAsync), new { id = produto.Id }, produto);
     }
 
     [HttpPut("{id:Guid}")]
@@ -115,7 +115,7 @@ public class ProdutosController : ControllerBase
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!ProdutoExists(id))
+            if (!_produtoService.ProdutoExists(id))
             {
                 return NotFound();
             }
@@ -150,16 +150,5 @@ public class ProdutosController : ControllerBase
         await _context.SaveChangesAsync();
 
         return NoContent();
-    }
-
-    private bool ProdutoExists(Guid id)
-    {
-        return (_context.Produtos?.Any(e => e.Id == id)).GetValueOrDefault();
-    }
-
-    private async Task<IdentityUser?> GetUser()
-    {
-        var user = await _userManager.FindByEmailAsync(User.FindFirst(ClaimTypes.Name).Value);
-        return user;
     }
 }

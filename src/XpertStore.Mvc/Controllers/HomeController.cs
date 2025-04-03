@@ -1,6 +1,6 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using XpertStore.Business.Services.Interfaces;
+using System.Diagnostics;
+using XpertStore.Application.Services.Interfaces;
 using XpertStore.Mvc.Models;
 
 namespace XpertStore.Mvc.Controllers
@@ -24,7 +24,7 @@ namespace XpertStore.Mvc.Controllers
         {
             var user = await _userService.GetUserAsync(User);
             Guid? userId = user != null ? new Guid(user.Id) : null;
-            var produtos = await _produtoService.Get(userId);
+            var produtos = await _produtoService.GetAllAsync(userId);
             List<ProdutoHomeViewModel> produtoViewModel = [];
             foreach (var produto in produtos)
             {

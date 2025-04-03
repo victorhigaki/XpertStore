@@ -7,9 +7,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XpertStore.Mvc", "src\Xpert
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XpertStore.Entities", "src\XpertStore.Entities\XpertStore.Entities.csproj", "{B4418F06-7617-4D99-AB77-441747572107}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XpertStore.Api", "src\XpertStore.Api\XpertStore.Api.csproj", "{450A46DC-AB8D-4EDB-A8B9-98E198ECE33E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XpertStore.Api", "src\XpertStore.Api\XpertStore.Api.csproj", "{450A46DC-AB8D-4EDB-A8B9-98E198ECE33E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XpertStore.Data", "src\XpertStore.Data\XpertStore.Data.csproj", "{3FA21DA0-EAF1-4D1C-9E9C-4EED8C8FEF4F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XpertStore.Data", "src\XpertStore.Data\XpertStore.Data.csproj", "{3FA21DA0-EAF1-4D1C-9E9C-4EED8C8FEF4F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XpertStore.Application", "src\XpertStore.Application\XpertStore.Application.csproj", "{464EE3E5-D99A-4967-A7FC-5FF0E61C27C4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XpertStore.Infra.IoC", "src\XpertStore.Infra.IoC\XpertStore.Infra.IoC.csproj", "{02A1FA7B-4A6D-4BC2-83AD-6643FE277B55}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +37,14 @@ Global
 		{3FA21DA0-EAF1-4D1C-9E9C-4EED8C8FEF4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3FA21DA0-EAF1-4D1C-9E9C-4EED8C8FEF4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3FA21DA0-EAF1-4D1C-9E9C-4EED8C8FEF4F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{464EE3E5-D99A-4967-A7FC-5FF0E61C27C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{464EE3E5-D99A-4967-A7FC-5FF0E61C27C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{464EE3E5-D99A-4967-A7FC-5FF0E61C27C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{464EE3E5-D99A-4967-A7FC-5FF0E61C27C4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02A1FA7B-4A6D-4BC2-83AD-6643FE277B55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02A1FA7B-4A6D-4BC2-83AD-6643FE277B55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02A1FA7B-4A6D-4BC2-83AD-6643FE277B55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02A1FA7B-4A6D-4BC2-83AD-6643FE277B55}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
