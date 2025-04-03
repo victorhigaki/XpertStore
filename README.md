@@ -4,7 +4,9 @@
 
 Bem-vindo ao repositório do projeto **XpertStore**. Este projeto é uma entrega do MBA DevXpert Full Stack .NET e é referente ao módulo **Introdução ao Desenvolvimento ASP.NET Core**.
 O objetivo principal desenvolver uma aplicação de Gestão de Mini Loja Virtual que permite aos usuários criar, editar, visualizar e excluir posts e comentários, tanto através de uma interface web utilizando MVC quanto através de uma API RESTful.
-Descreva livremente mais detalhes do seu projeto aqui.
+<!-- [
+  Descreva livremente mais detalhes do seu projeto aqui.
+] -->
 
 ### **Autor(es)**
 - **Victor Higaki**
@@ -25,7 +27,7 @@ O projeto consiste em:
   - ASP.NET Core MVC
   - ASP.NET Core Web API
   - Entity Framework Core
-- **Banco de Dados:** SQL Server
+- **Banco de Dados:** SQL Server / SQLite
 - **Autenticação e Autorização:**
   - ASP.NET Core Identity
   - JWT (JSON Web Token) para autenticação na API
@@ -42,6 +44,8 @@ A estrutura do projeto é organizada da seguinte forma:
 - src/
   - XpertStore.Mvc/ - Projeto MVC
   - XpertStore.Api/ - API RESTful
+  - XpertStore.Application/ - Camada de regras de negócio
+  - XpertStore.Infra.IoC/ - Camada de Inversão de Dependencia
   - XpertStore.Data/ - Configuração do EF Core
   - XpertStore.Entity/ - Modelos de Dados
 - README.md - Arquivo de Documentação do Projeto
@@ -60,7 +64,7 @@ A estrutura do projeto é organizada da seguinte forma:
 ### **Pré-requisitos**
 
 - .NET SDK 8.0 ou superior
-- SQLite / SQL Server
+- SQL Server / SQLite
 - Visual Studio 2022 ou superior (ou qualquer IDE de sua preferência)
 - Git
 

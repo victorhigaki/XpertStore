@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using XpertStore.Application.Services.Interfaces;
+using XpertStore.Application.Models.Base;
 using XpertStore.Data.Data;
 using XpertStore.Entities.Models;
 
@@ -16,14 +18,18 @@ public class ProdutosController : ControllerBase
     private readonly ApplicationDbContext _context;
     private readonly IProdutoService _produtoService;
     private readonly IUserService _userService;
+    protected Guid? UserId { get; set; } = null;
 
     public ProdutosController(ApplicationDbContext context,
         IProdutoService produtoService,
-        IUserService userService)
+        IUserService userService,
+        IAppIdentityUser user)
     {
         _context = context;
         _produtoService = produtoService;
         _userService = userService;
+
+        if (user.IsAuthenticated()) UserId = user.GetUserId();
     }
 
     [AllowAnonymous]
@@ -31,37 +37,43 @@ public class ProdutosController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesDefaultResponseType]
-    public async Task<ActionResult<IEnumerable<Produto>>> GetAllAsync()
+    public async Task<ActionResult<IEnumerable<Produto>>> Get(string? categoria, Guid? categoriaId)
     {
         if (_context.Produtos == null)
         {
             return NotFound();
         }
 
-        var user = await _userService.GetUserByEmailAsync(User.FindFirst(ClaimTypes.Name).Value);
+        var produtos = await _context.Produtos
+                                .Include(p => p.Categoria)
+                                .Include(p => p.Vendedor)
+                                .ToListAsync();
 
-        if (user == null)
-        {
-            return NotFound();
-        }
+        if (!string.IsNullOrEmpty(categoria))
+            produtos.Where(p => p.Categoria.Descricao.Contains(categoria));
 
-        var produtos = await _produtoService.GetAllAsync(new Guid(user.Id));
+        if (categoriaId == null)
+            produtos.Where(p => p.Categoria.Id == categoriaId);
 
-        return Ok(produtos);
+        return produtos;
     }
 
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:Guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesDefaultResponseType]
-    public async Task<ActionResult<Produto>> GetProdutos(int id)
+    public async Task<ActionResult<Produto>> Get(Guid id)
     {
         if (_context.Produtos == null)
         {
             return NotFound();
         }
 
-        var produto = await _context.Produtos.FindAsync(id);
+        var produto = await _context.Produtos
+                                        .Include(p => p.Categoria)
+                                        .Include(p => p.Vendedor)
+                                        .Where(p => p.Vendedor.Id == UserId)
+                                        .FirstOrDefaultAsync(p => p.Id == id);
 
         if (produto == null)
         {
@@ -75,7 +87,7 @@ public class ProdutosController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesDefaultResponseType]
-    public async Task<ActionResult<Produto>> PostProduto(Produto produto)
+    public async Task<ActionResult<Produto>> Post(Produto produto)
     {
         if (_context.Produtos == null)
         {
@@ -90,10 +102,24 @@ public class ProdutosController : ControllerBase
             });
         }
 
+        var categoria = await _context.Categorias.FindAsync(produto.Categoria.Id);
+        if (categoria == null)
+        {
+            return Problem("Erro ao criar um produto, contate o suporte!");
+        }
+        produto.Categoria = categoria;
+
+        var vendedor = await _context.Vendedores.FindAsync(produto.Vendedor.Id);
+        if (vendedor == null)
+        {
+            return Problem("Erro ao criar um produto, contate o suporte!");
+        }
+        produto.Vendedor = vendedor;
+
         _context.Produtos.Add(produto);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetAllAsync), new { id = produto.Id }, produto);
+        return CreatedAtAction(nameof(Get), new { id = produto.Id }, produto);
     }
 
     [HttpPut("{id:Guid}")]
@@ -101,11 +127,16 @@ public class ProdutosController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesDefaultResponseType]
-    public async Task<IActionResult> PutProduto(Guid id, Produto produto)
+    public async Task<IActionResult> Put(Guid id, Produto produto)
     {
         if (id != produto.Id) return BadRequest();
 
         if (!ModelState.IsValid) return ValidationProblem(ModelState);
+
+        if (produto.Vendedor.Id != UserId)
+        {
+            return Unauthorized();
+        }
 
         _context.Entry(produto).State = EntityState.Modified;
 
@@ -115,7 +146,7 @@ public class ProdutosController : ControllerBase
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!_produtoService.ProdutoExists(id))
+            if (!Exists(id))
             {
                 return NotFound();
             }
@@ -132,7 +163,7 @@ public class ProdutosController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesDefaultResponseType]
-    public async Task<IActionResult> DeleteProduto(Guid id)
+    public async Task<IActionResult> Delete(Guid id)
     {
         if (_context.Produtos == null)
         {
@@ -140,6 +171,12 @@ public class ProdutosController : ControllerBase
         }
 
         var produto = await _context.Produtos.FindAsync(id);
+
+
+        if (produto.Vendedor.Id != UserId)
+        {
+            return Unauthorized();
+        }
 
         if (produto == null)
         {
@@ -150,5 +187,10 @@ public class ProdutosController : ControllerBase
         await _context.SaveChangesAsync();
 
         return NoContent();
+    }
+
+    private bool Exists(Guid id)
+    {
+        return (_context.Produtos?.Any(e => e.Id == id)).GetValueOrDefault();
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using XpertStore.Application.Services.Interfaces;
+using XpertStore.Application.Models.Base;
 using XpertStore.Data.Data;
 using XpertStore.Entities.Models;
 using XpertStore.Mvc.Models;
@@ -16,21 +17,28 @@ public class ProdutosController : Controller
     private readonly ApplicationDbContext _context;
     private readonly IProdutoService _produtoService;
     private readonly IUserService _userService;
+    private Guid UserId;
 
     public ProdutosController(
         ApplicationDbContext context,
         IProdutoService produtoService,
-        IUserService userService)
+        IUserService userService, 
+        IAppIdentityUser user)
     {
         _context = context;
         _produtoService = produtoService;
         _userService = userService;
+
+        if (user.IsAuthenticated()) UserId = user.GetUserId();in
     }
 
     public async Task<IActionResult> Index()
     {
-        var user = await _userService.GetUserAsync(User);
-        var produtos = await _produtoService.GetAllAsync(new Guid(user.Id));
+        List<Produto> produtos = await _context.Produtos
+                                                    .Include(p => p.Categoria)
+                                                    .Include(p => p.Vendedor)
+                                                    .Where(p => p.Vendedor.Id == UserId)
+                                                    .ToListAsync();
         return base.View(produtos);
     }
 
@@ -112,7 +120,10 @@ public class ProdutosController : Controller
             return NotFound();
         }
 
-        var produto = await _context.Produtos.FindAsync(id);
+        var produto = await _context.Produtos
+                                        .Include(p => p.Categoria)
+                                        .Include(p => p.Vendedor)
+                                        .FirstOrDefaultAsync(p => p.Id == id);
         if (produto == null)
         {
             return NotFound();
@@ -182,7 +193,9 @@ public class ProdutosController : Controller
         }
 
         var produto = await _context.Produtos
-            .FirstOrDefaultAsync(m => m.Id == id);
+                                        .Include(p => p.Categoria)
+                                        .Include(p => p.Vendedor)
+                                        .FirstOrDefaultAsync(m => m.Id == id);
         if (produto == null)
         {
             return NotFound();
@@ -195,7 +208,20 @@ public class ProdutosController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(Guid id)
     {
-        var produto = await _context.Produtos.FindAsync(id);
+        if (_context.Produtos == null)
+        {
+            Problem("");
+        }
+
+        var produto = await _context.Produtos
+                                        .Include(p => p.Vendedor)
+                                        .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (produto.Vendedor.Id != UserId)
+        {
+            return RedirectToAction(nameof(Index));
+        }
+
         if (produto != null)
         {
             _context.Produtos.Remove(produto);

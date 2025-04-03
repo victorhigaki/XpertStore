@@ -6,6 +6,8 @@ using XpertStore.Infra.IoC;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddHttpContextAccessor();
+
 builder
     .AddApiConfig()
     .AddCorsConfig()
@@ -13,6 +15,8 @@ builder
     .AddDatabaseSelector()
     .AddIdentityConfig()
     .RegisterServices();
+
+builder.Services.ResolveDependencies();
 
 var app = builder.Build();
 
