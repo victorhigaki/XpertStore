@@ -62,19 +62,21 @@ namespace XpertStore.Data.Configurations
                 SecurityStamp = Guid.NewGuid().ToString()
             });
 
-            await contextId.AddAsync(new Vendedor
+            Vendedor vendedor1 = new Vendedor
             {
                 Id = userId
-            });
+            };
+            await contextId.AddAsync(vendedor1);
 
-            var categoriaId = Guid.NewGuid();
+            var categoria1 = new Categoria
+            {
+                Id = Guid.NewGuid(),
+                Nome = "Categoria 1",
+                Descricao = "Descricao Categoria 1"
+            };
 
             await contextId.AddRangeAsync([
-                new Categoria {
-                    Id = categoriaId,
-                    Nome = "Categoria 1",
-                    Descricao = "Descricao Categoria 1"
-                },
+                categoria1,
                 new Categoria {
                     Id = Guid.NewGuid(),
                     Nome = "Categoria 2",
@@ -90,8 +92,8 @@ namespace XpertStore.Data.Configurations
                 Imagem = "",
                 Preco = 456,
                 Estoque = 123,
-                CategoriaId = categoriaId,
-                VendedorId = userId,
+                Categoria = categoria1,
+                Vendedor = vendedor1,
             });
 
             await contextId.SaveChangesAsync();

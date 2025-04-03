@@ -9,9 +9,7 @@ public class Produto
     public decimal Preco { get; set; }
     public int Estoque { get; set; }
 
-    public Guid CategoriaId { get; set; }
     public Categoria Categoria { get; set; }
 
-    public Guid VendedorId { get; set; }
     public Vendedor Vendedor { get; set; }
 }

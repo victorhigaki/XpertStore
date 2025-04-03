@@ -31,9 +31,9 @@ public class ProdutosController : ControllerBase
         }
 
         return await _context.Produtos
-            .Include(p => p.Categoria)
-            .Include(p => p.Vendedor)
-            .ToListAsync();
+                                .Include(p => p.Categoria)
+                                .Include(p => p.Vendedor)
+                                .ToListAsync();
     }
 
     [HttpGet("{id:Guid}")]
@@ -47,7 +47,10 @@ public class ProdutosController : ControllerBase
             return NotFound();
         }
 
-        var produto = await _context.Produtos.FindAsync(id);
+        var produto = await _context.Produtos
+                                        .Include(p => p.Categoria)
+                                        .Include(p => p.Vendedor)
+                                        .FirstOrDefaultAsync(p => p.Id == id);
 
         if (produto == null)
         {
@@ -70,15 +73,25 @@ public class ProdutosController : ControllerBase
 
         if (!ModelState.IsValid)
         {
-            //return BadRequest(ModelState);
-
-            //return ValidationProblem(ModelState);
-
             return ValidationProblem(new ValidationProblemDetails(ModelState)
             {
                 Title = "Um ou mais erros de validação ocorreram!"
             });
         }
+
+        var categoria = await _context.Categorias.FindAsync(produto.Categoria.Id);
+        if (categoria == null)
+        {
+            return Problem("Erro ao criar um produto, contate o suporte!");
+        }
+        produto.Categoria = categoria;
+
+        var vendedor = await _context.Vendedores.FindAsync(produto.Vendedor.Id);
+        if (vendedor == null)
+        {
+            return Problem("Erro ao criar um produto, contate o suporte!");
+        }
+        produto.Vendedor = vendedor;
 
         _context.Produtos.Add(produto);
         await _context.SaveChangesAsync();

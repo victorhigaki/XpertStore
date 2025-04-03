@@ -19,15 +19,13 @@ public class ProdutosController : Controller
         _context = context;
     }
 
-    // GET: Produtos
     public async Task<IActionResult> Index()
     {
         List<Produto> produtos = await _context.Produtos.ToListAsync();
-        produtos.ForEach(produto => produto.Categoria = _context.Categorias.First(c => c.Id == produto.CategoriaId));
+        produtos.ForEach(produto => produto.Categoria = _context.Categorias.First(c => c.Id == produto.Categoria.Id));
         return base.View(produtos);
     }
 
-    // GET: Produtos/Details/5
     public async Task<IActionResult> Details(Guid? id)
     {
         if (id == null)
@@ -45,7 +43,6 @@ public class ProdutosController : Controller
         return View(produto);
     }
 
-    // GET: Produtos/Create
     public IActionResult Create()
     {
         ObterCategoriasViewBag();
@@ -63,9 +60,6 @@ public class ProdutosController : Controller
             .ToList();
     }
 
-    // POST: Produtos/Create
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("Nome,Descricao,ImagemUpload,Preco,Estoque,CategoriaId")] ProdutoViewModel produtoViewModel)
@@ -103,7 +97,6 @@ public class ProdutosController : Controller
         };
     }
 
-    // GET: Produtos/Edit/5
     public async Task<IActionResult> Edit(Guid? id)
     {
         if (id == null)
@@ -125,16 +118,13 @@ public class ProdutosController : Controller
             Imagem = produto.Imagem,
             Preco = produto.Preco,
             Estoque = produto.Estoque,
-            CategoriaId = produto.CategoriaId
+            CategoriaId = produto.Categoria.Id
         };
 
         ObterCategoriasViewBag();
         return View(produtoViewModel);
     }
 
-    // POST: Produtos/Edit/5
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(Guid id, [Bind("Nome,Descricao,ImagemUpload,Preco,Estoque,CategoriaId")] ProdutoViewModel produtoViewModel)
@@ -176,7 +166,6 @@ public class ProdutosController : Controller
         return View(produtoViewModel);
     }
 
-    // GET: Produtos/Delete/5
     public async Task<IActionResult> Delete(Guid? id)
     {
         if (id == null)
@@ -194,7 +183,6 @@ public class ProdutosController : Controller
         return View(produto);
     }
 
-    // POST: Produtos/Delete/5
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(Guid id)
