@@ -32,24 +32,32 @@ public class ProdutosController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesDefaultResponseType]
-    public async Task<ActionResult<IEnumerable<Produto>>> GetProduto()
+    public async Task<ActionResult<IEnumerable<Produto>>> Get(string? categoria, Guid? categoriaId)
     {
         if (_context.Produtos == null)
         {
             return NotFound();
         }
 
-        return await _context.Produtos
+        var produtos = await _context.Produtos
                                 .Include(p => p.Categoria)
                                 .Include(p => p.Vendedor)
                                 .ToListAsync();
+
+        if (!string.IsNullOrEmpty(categoria))
+            produtos.Where(p => p.Categoria.Descricao.Contains(categoria));
+
+        if (categoriaId == null)
+            produtos.Where(p => p.Categoria.Id == categoriaId);
+
+        return produtos;
     }
 
     [HttpGet("{id:Guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesDefaultResponseType]
-    public async Task<ActionResult<Produto>> GetProdutos(Guid id)
+    public async Task<ActionResult<Produto>> Get(Guid id)
     {
         if (_context.Produtos == null)
         {
@@ -74,7 +82,7 @@ public class ProdutosController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesDefaultResponseType]
-    public async Task<ActionResult<Produto>> PostProduto(Produto produto)
+    public async Task<ActionResult<Produto>> Post(Produto produto)
     {
         if (_context.Produtos == null)
         {
@@ -106,7 +114,7 @@ public class ProdutosController : ControllerBase
         _context.Produtos.Add(produto);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetProduto), new { id = produto.Id }, produto);
+        return CreatedAtAction(nameof(Get), new { id = produto.Id }, produto);
     }
 
     [HttpPut("{id:Guid}")]
@@ -114,7 +122,7 @@ public class ProdutosController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesDefaultResponseType]
-    public async Task<IActionResult> PutProduto(Guid id, Produto produto)
+    public async Task<IActionResult> Put(Guid id, Produto produto)
     {
         if (id != produto.Id) return BadRequest();
 
@@ -133,7 +141,7 @@ public class ProdutosController : ControllerBase
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!ProdutoExists(id))
+            if (!Exists(id))
             {
                 return NotFound();
             }
@@ -150,7 +158,7 @@ public class ProdutosController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesDefaultResponseType]
-    public async Task<IActionResult> DeleteProduto(Guid id)
+    public async Task<IActionResult> Delete(Guid id)
     {
         if (_context.Produtos == null)
         {
@@ -176,7 +184,7 @@ public class ProdutosController : ControllerBase
         return NoContent();
     }
 
-    private bool ProdutoExists(Guid id)
+    private bool Exists(Guid id)
     {
         return (_context.Produtos?.Any(e => e.Id == id)).GetValueOrDefault();
     }
