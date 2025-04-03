@@ -8,7 +8,7 @@ namespace XpertStore.Api.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("api/produtos")]
+[Route("api/[controller]")]
 public class ProdutosController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
@@ -36,11 +36,11 @@ public class ProdutosController : ControllerBase
             .ToListAsync();
     }
 
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:Guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesDefaultResponseType]
-    public async Task<ActionResult<Produto>> GetProdutos(int id)
+    public async Task<ActionResult<Produto>> GetProdutos(Guid id)
     {
         if (_context.Produtos == null)
         {
