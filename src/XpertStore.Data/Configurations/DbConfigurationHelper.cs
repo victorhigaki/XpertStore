@@ -89,7 +89,7 @@ public static class DbMigrationHelpers
             Id = Guid.NewGuid(),
             Nome = "Nome Teste",
             Descricao = "Descricao Teste",
-            Imagem = "",
+            Imagem = "82358ae7-f319-4852-b603-7abb66596d04_project2.jpg",
             Preco = 456,
             Estoque = 123,
             Categoria = categoria1,

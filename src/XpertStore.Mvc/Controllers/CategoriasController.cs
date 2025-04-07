@@ -75,14 +75,21 @@ public class CategoriasController : Controller
         {
             return NotFound();
         }
-        return View(categoria);
+
+        CategoriaViewModel categoriaViewModel = new()
+        {
+            Descricao = categoria.Descricao,
+            Nome= categoria.Nome,
+        };
+
+        return View(categoriaViewModel);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(Guid id, [Bind("Id,Nome,Descricao")] Categoria categoria)
+    public async Task<IActionResult> Edit(Guid id, [Bind("Id,Nome,Descricao")] CategoriaViewModel categoriaViewModel)
     {
-        if (id != categoria.Id)
+        if (id != categoriaViewModel.Id)
         {
             return NotFound();
         }
@@ -91,12 +98,21 @@ public class CategoriasController : Controller
         {
             try
             {
-                _context.Update(categoria);
+                var model = await _context.Categorias.FindAsync(id);
+                if (model == null)
+                {
+                    return NotFound();
+                }
+
+                model.Nome = categoriaViewModel.Nome;
+                model.Descricao = categoriaViewModel.Descricao;
+
+                _context.Update(model);
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!CategoriaExists(categoria.Id))
+                if (!CategoriaExists(categoriaViewModel.Id))
                 {
                     return NotFound();
                 }
@@ -107,7 +123,7 @@ public class CategoriasController : Controller
             }
             return RedirectToAction(nameof(Index));
         }
-        return View(categoria);
+        return View(categoriaViewModel);
     }
 
     public async Task<IActionResult> Delete(Guid? id)

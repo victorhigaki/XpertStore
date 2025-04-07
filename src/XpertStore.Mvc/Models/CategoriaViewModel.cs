@@ -5,6 +5,8 @@ namespace XpertStore.Mvc.Models;
 
 public class CategoriaViewModel
 {
+    public Guid Id { get; set; }
+
     [Required(ErrorMessage = "Preencha o campo {0}!")]
     public string Nome { get; set; }
 

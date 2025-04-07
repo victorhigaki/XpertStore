@@ -78,7 +78,7 @@ public class ProdutosController : Controller
             {
                 return View(produtoViewModel);
             }
-            Produto produto = MapProduto(produtoViewModel);
+            Produto produto = await MapProduto(produtoViewModel);
             produto.Imagem = imgPrefixo + produtoViewModel.ImagemUpload.FileName;
 
             _context.Add(produto);
@@ -88,20 +88,21 @@ public class ProdutosController : Controller
         return View(produtoViewModel);
     }
 
-    private Produto MapProduto(ProdutoViewModel produtoViewModel)
+    private async Task<Produto> MapProduto(ProdutoViewModel produtoViewModel)
     {
-        var userId = new Guid(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+        var produto = produtoViewModel.Id != null ?
+             await _context.Produtos.FindAsync(produtoViewModel.Id)
+             : new Produto();
 
-        return new Produto
-        {
-            Id = Guid.NewGuid(),
-            Nome = produtoViewModel.Nome,
-            Descricao = produtoViewModel.Descricao,
-            Preco = produtoViewModel.Preco,
-            Estoque = produtoViewModel.Estoque,
-            Categoria = _context.Categorias.First(c => c.Id == produtoViewModel.CategoriaId),
-            Vendedor = _context.Vendedores.First(v => v.Id == userId),
-        };
+        produto.Nome = produtoViewModel.Nome;
+        produto.Descricao = produtoViewModel.Descricao;
+        produto.Preco = produtoViewModel.Preco;
+        produto.Estoque = produtoViewModel.Estoque;
+        produto.Categoria = _context.Categorias.First(c => c.Id == produtoViewModel.CategoriaId);
+        Vendedor vendedor = await _context.Vendedores.FindAsync(UserId);
+        produto.Vendedor = vendedor;
+      
+        return produto;
     }
 
     public async Task<IActionResult> Edit(Guid? id)
@@ -137,14 +138,14 @@ public class ProdutosController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(Guid id, [Bind("Nome,Descricao,ImagemUpload,Preco,Estoque,CategoriaId")] ProdutoViewModel produtoViewModel)
+    public async Task<IActionResult> Edit(Guid id, [Bind("Id,Nome,Descricao,ImagemUpload,Preco,Estoque,CategoriaId")] ProdutoViewModel produtoViewModel)
     {
         if (ModelState.IsValid)
         {
             try
             {
-                var produto = MapProduto(produtoViewModel);
-                produto.Id = id;
+
+                var produto = await MapProduto(produtoViewModel);
 
                 if (produtoViewModel.ImagemUpload != null)
                 {
