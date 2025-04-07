@@ -7,10 +7,12 @@ namespace XpertStore.Mvc.Models;
 public class ProdutoViewModel
 {
     public Guid Id { get; set; }
+
+    [Required(ErrorMessage = "Preencha o campo {0}!")]
     public string Nome { get; set; }
 
 
-    [Required(ErrorMessage = "Descrição obrigatório")]
+    [Required(ErrorMessage = "Preencha o campo {0}!")]
     [DisplayName("Descrição")]
     public string Descricao { get; set; }
 
@@ -20,12 +22,15 @@ public class ProdutoViewModel
     [DisplayName("Imagem do Produto")]
     public IFormFile? ImagemUpload { get; set; }
 
-    [Required(ErrorMessage = "Preço obrigatório")]
     [DisplayName("Preço")]
+    [Required(ErrorMessage = "Preencha o campo {0}!")]
+    [Range(0.01, Double.MaxValue, ErrorMessage = "{0} precisa ser maior que {1}.")]
     public decimal Preco { get; set; }
-
-    [Required(ErrorMessage = "Estoque obrigatório")]
+    
+    [Required(ErrorMessage = "Preencha o campo {0}!")]
+    [Range(0, int.MaxValue, ErrorMessage = "{0} precisa ser maior que {1}.")]
     public int Estoque { get; set; }
 
+    [Required(ErrorMessage = "Preencha o campo {0}!")]
     public Guid CategoriaId { get; set; }
 }
