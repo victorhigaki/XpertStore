@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 using XpertStore.Application.Models.Base;
 using XpertStore.Data.Data;
 using XpertStore.Entities.Models;
@@ -166,12 +164,6 @@ public class ProdutosController : ControllerBase
         }
 
         var produto = await _context.Produtos.FindAsync(id);
-
-
-        if (produto.Vendedor.Id != UserId)
-        {
-            return Unauthorized();
-        }
 
         if (produto == null)
         {
