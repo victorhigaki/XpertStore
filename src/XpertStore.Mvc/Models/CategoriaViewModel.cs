@@ -5,12 +5,10 @@ namespace XpertStore.Mvc.Models;
 
 public class CategoriaViewModel
 {
-    public Guid Id { get; set; }
-
-    [Required(ErrorMessage = "Nome obrigatório")]
+    [Required(ErrorMessage = "Preencha o campo {0}!")]
     public string Nome { get; set; }
 
-    [Required(ErrorMessage = "Descrição obrigatório")]
     [DisplayName("Descrição")]
+    [Required(ErrorMessage = "Preencha o campo {0}!")]
     public string Descricao { get; set; }
 }

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using XpertStore.Data.Data;
 using XpertStore.Entities.Models;
-using XpertStore.Mvc.Data;
+using XpertStore.Mvc.Models;
 
 namespace XpertStore.Mvc.Controllers;
 
@@ -46,12 +46,17 @@ public class CategoriasController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Id,Nome,Descricao")] Categoria categoria)
+    public async Task<IActionResult> Create([Bind("Id,Nome,Descricao")] CategoriaViewModel categoria)
     {
         if (ModelState.IsValid)
         {
-            categoria.Id = Guid.NewGuid();
-            _context.Add(categoria);
+            var model = new Categoria
+            {
+                Nome = categoria.Nome,
+                Descricao = categoria.Descricao,
+            };
+
+            _context.Add(model);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
