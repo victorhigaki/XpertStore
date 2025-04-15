@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using XpertStore.Entities.Models;
+using XpertStore.Data.Models;
 
 namespace XpertStore.Data.Configurations;
 public class CategoriaoConfiguration : IEntityTypeConfiguration<Categoria>

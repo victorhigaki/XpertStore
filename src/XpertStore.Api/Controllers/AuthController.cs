@@ -10,7 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using XpertStore.Api.Controllers.Base;
 using XpertStore.Api.Models;
 using XpertStore.Data.Data;
-using XpertStore.Entities.Models;
+using XpertStore.Data.Models;
 
 namespace XpertStore.Api.Controllers;
 
