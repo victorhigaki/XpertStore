@@ -2,10 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using XpertStore.Application.Models.Base;
 using XpertStore.Data.Data;
-using XpertStore.Entities.Models;
+using XpertStore.Data.Models;
+using XpertStore.Data.Models.Base;
 using XpertStore.Mvc.Models;
 
 namespace XpertStore.Mvc.Controllers;

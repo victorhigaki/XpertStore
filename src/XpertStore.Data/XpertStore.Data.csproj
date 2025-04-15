@@ -21,10 +21,6 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.3" />
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\XpertStore.Entities\XpertStore.Entities.csproj" />
-  </ItemGroup>
 	
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />

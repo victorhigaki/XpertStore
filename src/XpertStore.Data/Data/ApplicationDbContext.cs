@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using XpertStore.Entities.Models;
+using XpertStore.Data.Models;
 
 namespace XpertStore.Data.Data;
 

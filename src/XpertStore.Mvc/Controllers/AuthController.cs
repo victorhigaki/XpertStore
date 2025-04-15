@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using XpertStore.Data.Data;
-using XpertStore.Entities.Models;
+using XpertStore.Data.Models;
 using XpertStore.Mvc.Models;
 
 namespace XpertStore.Mvc.Controllers;

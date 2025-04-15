@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using XpertStore.Data.Data;
-using XpertStore.Entities.Models;
+using XpertStore.Data.Models.Base;
 
 namespace XpertStore.Api.Controllers.Base;
 

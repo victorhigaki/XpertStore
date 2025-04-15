@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using XpertStore.Data.Data;
-using XpertStore.Entities.Models;
+using XpertStore.Data.Models;
 
 namespace XpertStore.Data.Configurations;
 
