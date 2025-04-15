@@ -25,7 +25,6 @@
 	<ItemGroup>
 		<ProjectReference Include="..\XpertStore.Application\XpertStore.Application.csproj" />
 		<ProjectReference Include="..\XpertStore.Data\XpertStore.Data.csproj" />
-		<ProjectReference Include="..\XpertStore.Infra.IoC\XpertStore.Infra.IoC.csproj" />
 	</ItemGroup>
 
 </Project>

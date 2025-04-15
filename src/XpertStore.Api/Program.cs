@@ -1,6 +1,5 @@
 using XpertStore.Api.Configuration;
 using XpertStore.Data.Configurations;
-using XpertStore.Infra.IoC;
 
 var builder = WebApplication.CreateBuilder(args);
 
