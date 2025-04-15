@@ -1,4 +1,4 @@
-﻿namespace XpertStore.Application.Models.Base;
+﻿namespace XpertStore.Data.Models.Base;
 
 public interface IAppIdentityUser
 {
