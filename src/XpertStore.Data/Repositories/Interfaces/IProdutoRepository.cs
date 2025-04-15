@@ -9,5 +9,6 @@ public interface IProdutoRepository
     Task Create(Produto produto);
     Task Update(Produto produto);
     Task Delete(Produto produto);
-    bool ProdutoExists(Guid id);
+    bool Exists(Guid id);
+    Task<bool> ProdutoIsUsingCategoria(Guid categoriaId);
 }

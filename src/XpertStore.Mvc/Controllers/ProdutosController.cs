@@ -162,7 +162,7 @@ public class ProdutosController : Controller
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_produtoRepository.ProdutoExists(id))
+                if (!_produtoRepository.Exists(id))
                 {
                     return NotFound();
                 }

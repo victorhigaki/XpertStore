@@ -51,9 +51,14 @@ public class ProdutoRepository : IProdutoRepository
         await _context.SaveChangesAsync();
     }
 
-    public bool ProdutoExists(Guid id)
+    public bool Exists(Guid id)
     {
         return _context.Produtos.Any(e => e.Id == id);
+    }
+
+    public async Task<bool> ProdutoIsUsingCategoria(Guid categoriaId)
+    {
+        return await _context.Produtos.AnyAsync(p => p.Categoria.Id == categoriaId);
     }
 }
 

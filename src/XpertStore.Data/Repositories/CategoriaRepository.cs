@@ -19,8 +19,39 @@ public class CategoriaRepository : ICategoriaRepository
         return categorias;
     }
 
-    public async Task<Categoria?> GetById(Guid id)
+    public async Task<Categoria?> GetById(Guid? id)
     {
-        return await _context.Categorias.FirstOrDefaultAsync(c => c.Id == id);
+        if (id == null)
+        {
+            return null;
+        }
+        return await _context.Categorias.FindAsync(id);
+    }
+
+    public async Task Create(Categoria model)
+    {
+        _context.Add(model);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task Update(Categoria model)
+    {
+        _context.Update(model);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task Delete(Categoria categoria)
+    {
+        if (categoria != null)
+        {
+            _context.Categorias.Remove(categoria);
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+    public bool Exists(Guid? id)
+    {
+        return _context.Categorias.Any(e => e.Id == id);
     }
 }
