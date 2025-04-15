@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using XpertStore.Data.Data;
 using XpertStore.Data.Models;
 using XpertStore.Data.Models.Base;
+using XpertStore.Data.Repositories.Interfaces;
 using XpertStore.Mvc.Models;
 
 namespace XpertStore.Mvc.Controllers;
@@ -12,23 +12,28 @@ namespace XpertStore.Mvc.Controllers;
 [Authorize]
 public class ProdutosController : Controller
 {
-    private readonly ApplicationDbContext _context;
     private Guid UserId;
+    private readonly IProdutoRepository _produtoRepository;
+    private readonly ICategoriaRepository _categoriaRepository;
+    private readonly IVendedorRepository _vendedorRepository;
 
-    public ProdutosController(ApplicationDbContext context, IAppIdentityUser user)
+    public ProdutosController(
+        IAppIdentityUser user,
+        IProdutoRepository produtoRepository,
+        ICategoriaRepository categoriaRepository,
+        IVendedorRepository vendedorRepository
+        )
     {
-        _context = context;
+        _produtoRepository = produtoRepository;
+        _categoriaRepository = categoriaRepository;
+        _vendedorRepository = vendedorRepository;
 
         if (user.IsAuthenticated()) UserId = user.GetUserId();
     }
 
     public async Task<IActionResult> Index()
     {
-        List<Produto> produtos = await _context.Produtos
-                                                    .Include(p => p.Categoria)
-                                                    .Include(p => p.Vendedor)
-                                                    .Where(p => p.Vendedor.Id == UserId)
-                                                    .ToListAsync();
+        List<Produto> produtos = await _produtoRepository.GetProdutosByUserId(UserId);
         return base.View(produtos);
     }
 
@@ -39,8 +44,7 @@ public class ProdutosController : Controller
             return NotFound();
         }
 
-        var produto = await _context.Produtos
-            .FirstOrDefaultAsync(m => m.Id == id);
+        var produto = await _produtoRepository.GetById(id.Value);
         if (produto == null)
         {
             return NotFound();
@@ -49,15 +53,16 @@ public class ProdutosController : Controller
         return View(produto);
     }
 
-    public IActionResult Create()
+    public async Task<IActionResult> Create()
     {
-        ObterCategoriasViewBag();
+        await ObterCategoriasViewBag();
         return View();
     }
 
-    private void ObterCategoriasViewBag()
+    private async Task ObterCategoriasViewBag()
     {
-        ViewBag.Categorias = _context.Categorias
+        List<Categoria> categorias = await _categoriaRepository.GetAll();
+        ViewBag.Categorias = categorias
             .Select(c => new SelectListItem()
             {
                 Text = c.Nome,
@@ -77,30 +82,28 @@ public class ProdutosController : Controller
             {
                 return View(produtoViewModel);
             }
-            Produto produto = await MapProduto(produtoViewModel);
+            Produto produto = await MapCreateProduto(produtoViewModel);
             produto.Imagem = imgPrefixo + produtoViewModel.ImagemUpload.FileName;
 
-            _context.Add(produto);
-            await _context.SaveChangesAsync();
+            await _produtoRepository.Create(produto);
+
             return RedirectToAction(nameof(Index));
         }
         return View(produtoViewModel);
     }
 
-    private async Task<Produto> MapProduto(ProdutoViewModel produtoViewModel)
+    private async Task<Produto> MapCreateProduto(ProdutoViewModel produtoViewModel)
     {
-        var produto = produtoViewModel.Id != null ?
-             await _context.Produtos.FindAsync(produtoViewModel.Id)
-             : new Produto();
+        var produto = new Produto()
+        {
+            Nome = produtoViewModel.Nome,
+            Descricao = produtoViewModel.Descricao,
+            Preco = produtoViewModel.Preco,
+            Estoque = produtoViewModel.Estoque,
+            Categoria = await _categoriaRepository.GetById(produtoViewModel.CategoriaId),
+            Vendedor = await _vendedorRepository.GetById(UserId)
+        };
 
-        produto.Nome = produtoViewModel.Nome;
-        produto.Descricao = produtoViewModel.Descricao;
-        produto.Preco = produtoViewModel.Preco;
-        produto.Estoque = produtoViewModel.Estoque;
-        produto.Categoria = _context.Categorias.First(c => c.Id == produtoViewModel.CategoriaId);
-        Vendedor vendedor = await _context.Vendedores.FindAsync(UserId);
-        produto.Vendedor = vendedor;
-      
         return produto;
     }
 
@@ -111,10 +114,8 @@ public class ProdutosController : Controller
             return NotFound();
         }
 
-        var produto = await _context.Produtos
-                                        .Include(p => p.Categoria)
-                                        .Include(p => p.Vendedor)
-                                        .FirstOrDefaultAsync(p => p.Id == id);
+        var produto = await _produtoRepository.GetById(id.Value);
+
         if (produto == null)
         {
             return NotFound();
@@ -131,7 +132,7 @@ public class ProdutosController : Controller
             CategoriaId = produto.Categoria.Id
         };
 
-        ObterCategoriasViewBag();
+        await ObterCategoriasViewBag();
         return View(produtoViewModel);
     }
 
@@ -144,7 +145,7 @@ public class ProdutosController : Controller
             try
             {
 
-                var produto = await MapProduto(produtoViewModel);
+                var produto = await MapEditProduto(produtoViewModel);
 
                 if (produtoViewModel.ImagemUpload != null)
                 {
@@ -157,12 +158,11 @@ public class ProdutosController : Controller
                     produto.Imagem = imgPrefixo + produtoViewModel.ImagemUpload.FileName;
                 }
 
-                _context.Update(produto);
-                await _context.SaveChangesAsync();
+                await _produtoRepository.Update(produto);
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ProdutoExists(id))
+                if (!_produtoRepository.ProdutoExists(id))
                 {
                     return NotFound();
                 }
@@ -176,6 +176,20 @@ public class ProdutosController : Controller
         return View(produtoViewModel);
     }
 
+    private async Task<Produto> MapEditProduto(ProdutoViewModel produtoViewModel)
+    {
+        var produto = await _produtoRepository.GetById(produtoViewModel.Id);
+
+        produto.Nome = produtoViewModel.Nome;
+        produto.Descricao = produtoViewModel.Descricao;
+        produto.Preco = produtoViewModel.Preco;
+        produto.Estoque = produtoViewModel.Estoque;
+        produto.Categoria = await _categoriaRepository.GetById(produtoViewModel.CategoriaId)!;
+        produto.Vendedor = await _vendedorRepository.GetById(UserId)!;
+
+        return produto;
+    }
+
     public async Task<IActionResult> Delete(Guid? id)
     {
         if (id == null)
@@ -183,10 +197,8 @@ public class ProdutosController : Controller
             return NotFound();
         }
 
-        var produto = await _context.Produtos
-                                        .Include(p => p.Categoria)
-                                        .Include(p => p.Vendedor)
-                                        .FirstOrDefaultAsync(m => m.Id == id);
+        var produto = await _produtoRepository.GetById(id.Value);
+
         if (produto == null)
         {
             return NotFound();
@@ -199,14 +211,7 @@ public class ProdutosController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(Guid id)
     {
-        if (_context.Produtos == null)
-        {
-            Problem("");
-        }
-
-        var produto = await _context.Produtos
-                                        .Include(p => p.Vendedor)
-                                        .FirstOrDefaultAsync(p => p.Id == id);
+        var produto = await _produtoRepository.GetById(id);
 
         if (produto.Vendedor.Id != UserId)
         {
@@ -215,16 +220,10 @@ public class ProdutosController : Controller
 
         if (produto != null)
         {
-            _context.Produtos.Remove(produto);
+            await _produtoRepository.Delete(produto);
         }
 
-        await _context.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
-    }
-
-    private bool ProdutoExists(Guid id)
-    {
-        return _context.Produtos.Any(e => e.Id == id);
     }
 
     private async Task<bool> UploadArquivo(IFormFile arquivo, string imgPrefixo)
