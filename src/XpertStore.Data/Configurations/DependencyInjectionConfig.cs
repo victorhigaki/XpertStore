@@ -12,6 +12,8 @@ public static class DependencyInjectionConfig
 
         services.AddScoped<IAppIdentityUser, AppIdentityUser>();
         services.AddScoped<ICategoriaRepository, CategoriaRepository>();
+        services.AddScoped<IProdutoRepository, ProdutoRepository>();
+        services.AddScoped<IVendedorRepository, VendedorRepository>();
 
         return services;
     }

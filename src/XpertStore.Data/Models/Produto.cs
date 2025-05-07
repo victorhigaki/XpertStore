@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using XpertStore.Data.Models.Base;
 
 namespace XpertStore.Data.Models;
 
-public class Produto
+public class Produto : BaseEntity
 {
     [Key]
     public Guid Id { get; set; }

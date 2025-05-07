@@ -1,7 +1,6 @@
-﻿namespace XpertStore.Data.Models
+﻿namespace XpertStore.Data.Models;
+
+public class Vendedor
 {
-    public class Vendedor
-    {
-        public Guid Id { get; set; }
-    }
+    public Guid Id { get; set; }
 }
