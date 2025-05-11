@@ -38,7 +38,7 @@ public class ProdutoRepository : IProdutoRepository
         var produto = await _context.Produtos
                                         .Include(p => p.Categoria)
                                         .Include(p => p.Vendedor)
-                                        .Where(p => p.Vendedor.Id == UserId)
+                                        .Where(p => p.VendedorId == UserId)
                                         .FirstOrDefaultAsync(p => p.Id == id);
         return produto;
     }
