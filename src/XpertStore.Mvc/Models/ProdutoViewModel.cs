@@ -6,17 +6,17 @@ namespace XpertStore.Mvc.Models;
 
 public class ProdutoViewModel
 {
+    [Key]
     public Guid Id { get; set; }
 
     [Required(ErrorMessage = "Preencha o campo {0}!")]
-    public string Nome { get; set; }
-
+    public string Nome { get; set; } = "";
 
     [Required(ErrorMessage = "Preencha o campo {0}!")]
     [DisplayName("Descrição")]
-    public string Descricao { get; set; }
+    public string Descricao { get; set; } = "";
 
-    public string? Imagem { get; set; }
+    public string Imagem { get; set; } = "";
 
     [NotMapped]
     [DisplayName("Imagem do Produto")]
@@ -24,13 +24,17 @@ public class ProdutoViewModel
 
     [DisplayName("Preço")]
     [Required(ErrorMessage = "Preencha o campo {0}!")]
-    [Range(0.01, Double.MaxValue, ErrorMessage = "{0} precisa ser maior que {1}.")]
+    [Range(0.01, double.MaxValue, ErrorMessage = "{0} precisa ser maior que {1}.")]
     public decimal Preco { get; set; }
-    
+
     [Required(ErrorMessage = "Preencha o campo {0}!")]
     [Range(0, int.MaxValue, ErrorMessage = "{0} precisa ser maior que {1}.")]
     public int Estoque { get; set; }
 
     [Required(ErrorMessage = "Preencha o campo {0}!")]
     public Guid CategoriaId { get; set; }
+    public CategoriaViewModel? Categoria { get; set; }
+
+    public Guid VendedorId { get; set; }
+    public VendedorViewModel? Vendedor { get; set; }
 }

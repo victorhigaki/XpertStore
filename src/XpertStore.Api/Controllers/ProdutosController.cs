@@ -1,28 +1,32 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using XpertStore.Data.Data;
+using XpertStore.Api.Controllers.Base;
+using XpertStore.Api.Models;
 using XpertStore.Data.Models;
 using XpertStore.Data.Models.Base;
+using XpertStore.Data.Repositories;
 
 namespace XpertStore.Api.Controllers;
 
-[Authorize]
-[ApiController]
-[Route("api/[controller]")]
-public class ProdutosController : ControllerBase
+public class ProdutosController : BaseApiController
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IProdutoRepository _produtoRepository;
+    private readonly ICategoriaRepository _categoriaRepository;
+    private readonly IVendedorRepository _vendedorRepository;
 
     protected Guid? UserId { get; set; } = null;
 
     public ProdutosController(
-        ApplicationDbContext context,
-        IAppIdentityUser user)
+        IAppIdentityUser user,
+        IProdutoRepository produtoRepository,
+        ICategoriaRepository categoriaRepository,
+        IVendedorRepository vendedorRepository)
     {
-        _context = context;
-
         if (user.IsAuthenticated()) UserId = user.GetUserId();
+        _produtoRepository = produtoRepository;
+        _categoriaRepository = categoriaRepository;
+        _vendedorRepository = vendedorRepository;
     }
 
     [AllowAnonymous]
@@ -30,17 +34,14 @@ public class ProdutosController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesDefaultResponseType]
-    public async Task<ActionResult<IEnumerable<Produto>>> Get(string? categoria, Guid? categoriaId)
+    public async Task<ActionResult<IEnumerable<ProdutoViewModel>>> Get(string? categoria, Guid? categoriaId)
     {
-        if (_context.Produtos == null)
+        if (_produtoRepository.IsNull())
         {
             return NotFound();
         }
 
-        var produtos = await _context.Produtos
-                                .Include(p => p.Categoria)
-                                .Include(p => p.Vendedor)
-                                .ToListAsync();
+        var produtos = await _produtoRepository.GetProdutosCategoriaVendedorAsync();
 
         if (!string.IsNullOrEmpty(categoria))
             produtos.Where(p => p.Categoria.Descricao.Contains(categoria));
@@ -48,25 +49,23 @@ public class ProdutosController : ControllerBase
         if (categoriaId == null)
             produtos.Where(p => p.Categoria.Id == categoriaId);
 
-        return produtos;
+        var produtosViewModel = MapToProdutosViewModel(produtos);
+
+        return Ok(produtosViewModel);
     }
 
     [HttpGet("{id:Guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesDefaultResponseType]
-    public async Task<ActionResult<Produto>> Get(Guid id)
+    public async Task<ActionResult<ProdutoViewModel>> Get(Guid id)
     {
-        if (_context.Produtos == null)
+        if (_produtoRepository.IsNull())
         {
             return NotFound();
         }
 
-        var produto = await _context.Produtos
-                                        .Include(p => p.Categoria)
-                                        .Include(p => p.Vendedor)
-                                        .Where(p => p.Vendedor.Id == UserId)
-                                        .FirstOrDefaultAsync(p => p.Id == id);
+        var produto = await _produtoRepository.GetProdutoCategoriaVendedorByIdAndUserIdAsync(id, UserId.Value);
 
         if (produto == null)
         {
@@ -80,9 +79,9 @@ public class ProdutosController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesDefaultResponseType]
-    public async Task<ActionResult<Produto>> Post(Produto produto)
+    public async Task<ActionResult<ProdutoViewModel>> Post(ProdutoViewModel produtoViewModel)
     {
-        if (_context.Produtos == null)
+        if (_produtoRepository.IsNull())
         {
             return Problem("Erro ao criar um produto, contate o suporte!");
         }
@@ -95,24 +94,11 @@ public class ProdutosController : ControllerBase
             });
         }
 
-        var categoria = await _context.Categorias.FindAsync(produto.Categoria.Id);
-        if (categoria == null)
-        {
-            return Problem("Erro ao criar um produto, contate o suporte!");
-        }
-        produto.Categoria = categoria;
+        var produto = MapToProduto(produtoViewModel);
 
-        var vendedor = await _context.Vendedores.FindAsync(produto.Vendedor.Id);
-        if (vendedor == null)
-        {
-            return Problem("Erro ao criar um produto, contate o suporte!");
-        }
-        produto.Vendedor = vendedor;
+        var result = await _produtoRepository.CreateAsync(produto);
 
-        _context.Produtos.Add(produto);
-        await _context.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(Get), new { id = produto.Id }, produto);
+        return CreatedAtAction(nameof(Get), new { id = result.Id }, produtoViewModel);
     }
 
     [HttpPut("{id:Guid}")]
@@ -120,26 +106,24 @@ public class ProdutosController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesDefaultResponseType]
-    public async Task<IActionResult> Put(Guid id, Produto produto)
+    public async Task<IActionResult> Put(Guid id, ProdutoViewModel produtoViewModel)
     {
-        if (id != produto.Id) return BadRequest();
+        if (id != produtoViewModel.Id) return BadRequest();
 
         if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
-        if (produto.Vendedor.Id != UserId)
+        if (produtoViewModel.Vendedor.Id != UserId)
         {
             return Unauthorized();
         }
 
-        _context.Entry(produto).State = EntityState.Modified;
-
         try
         {
-            await _context.SaveChangesAsync();
+            await _produtoRepository.UpdateAsync(MapToProduto(produtoViewModel));
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!Exists(id))
+            if (!_produtoRepository.Exists(id))
             {
                 return NotFound();
             }
@@ -158,26 +142,99 @@ public class ProdutosController : ControllerBase
     [ProducesDefaultResponseType]
     public async Task<IActionResult> Delete(Guid id)
     {
-        if (_context.Produtos == null)
+        if (_produtoRepository.IsNull())
         {
             return NotFound();
         }
 
-        var produto = await _context.Produtos.FindAsync(id);
+        var result = await _produtoRepository.DeleteAsync(id);
 
-        if (produto == null)
+        if (result == null)
         {
             return NotFound();
         }
-
-        _context.Produtos.Remove(produto);
-        await _context.SaveChangesAsync();
 
         return NoContent();
     }
 
-    private bool Exists(Guid id)
+    private IEnumerable<ProdutoViewModel> MapToProdutosViewModel(IEnumerable<Produto> produtos)
     {
-        return (_context.Produtos?.Any(e => e.Id == id)).GetValueOrDefault();
+        var produtoViewModelList = new List<ProdutoViewModel>();
+
+        foreach (var produto in produtos)
+        {
+            produtoViewModelList.Add(MapToProdutoViewModel(produto));
+        }
+
+        return produtoViewModelList;
+    }
+
+    private ProdutoViewModel MapToProdutoViewModel(Produto produto)
+    {
+        return new ProdutoViewModel
+        {
+            Id = produto.Id,
+            Nome = produto.Nome,
+            Descricao = produto.Descricao,
+            Imagem = produto.Imagem,
+            Preco = produto.Preco,
+            Estoque = produto.Estoque,
+            CategoriaId = produto.CategoriaId,
+            Categoria = MapToCategoriaViewModel(produto.Categoria),
+            VendedorId = produto.VendedorId,
+            Vendedor = MapToVendedorViewModel(produto.Vendedor),
+        };
+    }
+
+    private static CategoriaViewModel MapToCategoriaViewModel(Categoria categoria)
+    {
+        return new CategoriaViewModel()
+        {
+            Id = categoria.Id,
+            Nome = categoria.Nome,
+            Descricao = categoria.Descricao,
+        };
+    }
+
+    private static VendedorViewModel MapToVendedorViewModel(Vendedor vendedor)
+    {
+        return new VendedorViewModel()
+        {
+            Id = vendedor.Id,
+        };
+    }
+
+    private Produto MapToProduto(ProdutoViewModel produtoViewModel)
+    {
+        return new Produto
+        {
+            Id = produtoViewModel.Id,
+            Nome = produtoViewModel.Nome,
+            Descricao = produtoViewModel.Descricao,
+            Imagem = produtoViewModel.Imagem,
+            Preco = produtoViewModel.Preco,
+            Estoque = produtoViewModel.Estoque,
+            CategoriaId = produtoViewModel.CategoriaId,
+            Categoria = MapToCategoria(produtoViewModel.Categoria),
+            VendedorId = produtoViewModel.VendedorId,
+            Vendedor = MapToVendedor(produtoViewModel.Vendedor)
+        };
+    }
+
+    private static Categoria MapToCategoria(CategoriaViewModel categoriaViewModel)
+    {
+        return new Categoria()
+        {
+            Id = categoriaViewModel.Id,
+            Nome = categoriaViewModel.Nome,
+            Descricao = categoriaViewModel.Descricao,
+        };
+    }
+    private static Vendedor MapToVendedor(VendedorViewModel vendedorViewModel)
+    {
+        return new Vendedor()
+        {
+            Id = vendedorViewModel.Id,
+        };
     }
 }

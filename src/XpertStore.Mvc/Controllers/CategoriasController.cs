@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using XpertStore.Data.Data;
 using XpertStore.Data.Models;
+using XpertStore.Data.Repositories;
 using XpertStore.Mvc.Models;
 
 namespace XpertStore.Mvc.Controllers;
@@ -10,27 +10,26 @@ namespace XpertStore.Mvc.Controllers;
 [Authorize]
 public class CategoriasController : Controller
 {
-    private readonly ApplicationDbContext _context;
+    private readonly ICategoriaRepository _categoriaRepository;
 
-    public CategoriasController(ApplicationDbContext context)
+    public CategoriasController(ICategoriaRepository categoriaRepository)
     {
-        _context = context;
+        _categoriaRepository = categoriaRepository;
     }
 
     public async Task<IActionResult> Index()
     {
-        return View(await _context.Categorias.ToListAsync());
+        return View(await _categoriaRepository.GetAllAsync());
     }
 
-    public async Task<IActionResult> Details(Guid? id)
+    public async Task<IActionResult> Details(Guid id)
     {
-        if (id == null)
+        if (_categoriaRepository.IsNull())
         {
             return NotFound();
         }
 
-        var categoria = await _context.Categorias
-            .FirstOrDefaultAsync(m => m.Id == id);
+        var categoria = await _categoriaRepository.GetByIdAsync(id);
         if (categoria == null)
         {
             return NotFound();
@@ -46,31 +45,30 @@ public class CategoriasController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Id,Nome,Descricao")] CategoriaViewModel categoria)
+    public async Task<IActionResult> Create([Bind("Id,Nome,Descricao")] CategoriaViewModel categoriaViewModel)
     {
         if (ModelState.IsValid)
         {
-            var model = new Categoria
+            Categoria categoria = new Categoria
             {
-                Nome = categoria.Nome,
-                Descricao = categoria.Descricao,
+                Nome = categoriaViewModel.Nome,
+                Descricao = categoriaViewModel.Descricao,
             };
 
-            _context.Add(model);
-            await _context.SaveChangesAsync();
+            await _categoriaRepository.CreateAsync(categoria);
             return RedirectToAction(nameof(Index));
         }
-        return View(categoria);
+        return View(categoriaViewModel);
     }
 
-    public async Task<IActionResult> Edit(Guid? id)
+    public async Task<IActionResult> Edit(Guid id)
     {
-        if (id == null)
+        if (_categoriaRepository.IsNull())
         {
             return NotFound();
         }
 
-        var categoria = await _context.Categorias.FindAsync(id);
+        var categoria = await _categoriaRepository.GetByIdAsync(id);
         if (categoria == null)
         {
             return NotFound();
@@ -79,7 +77,7 @@ public class CategoriasController : Controller
         CategoriaViewModel categoriaViewModel = new()
         {
             Descricao = categoria.Descricao,
-            Nome= categoria.Nome,
+            Nome = categoria.Nome,
         };
 
         return View(categoriaViewModel);
@@ -91,50 +89,41 @@ public class CategoriasController : Controller
     {
         if (id != categoriaViewModel.Id)
         {
-            return NotFound();
+            return BadRequest();
         }
 
         if (ModelState.IsValid)
         {
             try
             {
-                var model = await _context.Categorias.FindAsync(id);
-                if (model == null)
+                var categoria = await _categoriaRepository.GetByIdAsync(id);
+                if (categoria == null)
                 {
                     return NotFound();
                 }
 
-                model.Nome = categoriaViewModel.Nome;
-                model.Descricao = categoriaViewModel.Descricao;
+                categoria.Nome = categoriaViewModel.Nome;
+                categoria.Descricao = categoriaViewModel.Descricao;
 
-                _context.Update(model);
-                await _context.SaveChangesAsync();
+                await _categoriaRepository.UpdateAsync(categoria);
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!CategoriaExists(categoriaViewModel.Id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                throw;
             }
             return RedirectToAction(nameof(Index));
         }
         return View(categoriaViewModel);
     }
 
-    public async Task<IActionResult> Delete(Guid? id)
+    public async Task<IActionResult> Delete(Guid id)
     {
-        if (id == null)
+        if (_categoriaRepository.IsNull())
         {
             return NotFound();
         }
 
-        var categoria = await _context.Categorias
-            .FirstOrDefaultAsync(m => m.Id == id);
+        var categoria = await _categoriaRepository.GetByIdAsync(id);
         if (categoria == null)
         {
             return NotFound();
@@ -147,29 +136,18 @@ public class CategoriasController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(Guid id)
     {
-        var categoria = await _context.Categorias.FindAsync(id);
+        var categoria = await _categoriaRepository.GetByIdAsync(id);
 
-        if (await CategoriaEmUso(id))
+        if (await _categoriaRepository.CategoriaEmUsoAsync(id))
         {
             return BadRequest("Categoria com Produto associado");
         }
 
         if (categoria != null)
         {
-            _context.Categorias.Remove(categoria);
+            await _categoriaRepository.DeleteAsync(id);
         }
 
-        await _context.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
-    }
-
-    private bool CategoriaExists(Guid id)
-    {
-        return _context.Categorias.Any(e => e.Id == id);
-    }
-
-    private async Task<bool> CategoriaEmUso(Guid categoriaId)
-    {
-        return await _context.Produtos.AnyAsync(p => p.Categoria.Id == categoriaId);
     }
 }
