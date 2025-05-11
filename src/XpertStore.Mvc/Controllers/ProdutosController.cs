@@ -32,7 +32,19 @@ public class ProdutosController : Controller
 
     public async Task<IActionResult> Index()
     {
-        return base.View(await _produtoRepository.GetProdutosCategoriaVendedorAsync());
+        return base.View(MapToProdutosViewModel(await _produtoRepository.GetProdutosCategoriaVendedorAsync()));
+    }
+
+    private IEnumerable<ProdutoViewModel> MapToProdutosViewModel(IEnumerable<Produto> produtos)
+    {
+        var produtoViewModelList = new List<ProdutoViewModel>();
+
+        foreach (var produto in produtos)
+        {
+            produtoViewModelList.Add(MapToProdutoViewModel(produto));
+        }
+
+        return produtoViewModelList;
     }
 
     public async Task<IActionResult> Details(Guid id)
@@ -80,7 +92,7 @@ public class ProdutosController : Controller
             {
                 return View(produtoViewModel);
             }
-            Produto produto = await MapProduto(produtoViewModel);
+            Produto produto = await MapToProduto(produtoViewModel);
             produto.Imagem = imgPrefixo + produtoViewModel.ImagemUpload.FileName;
 
             await _produtoRepository.CreateAsync(produto);
@@ -125,7 +137,7 @@ public class ProdutosController : Controller
                     produtoViewModel.Imagem = imgPrefixo + produtoViewModel.ImagemUpload.FileName;
                 }
 
-                var produto = await MapProduto(produtoViewModel);
+                var produto = await MapToProduto(produtoViewModel);
                 await _produtoRepository.UpdateAsync(produto);
             }
             catch (DbUpdateConcurrencyException)
@@ -205,10 +217,10 @@ public class ProdutosController : Controller
 
     private async Task<ProdutoViewModel> GetProdutoById(Guid id)
     {
-        return MapProdutoViewModel(await _produtoRepository.GetByIdAsync(id));
+        return MapToProdutoViewModel(await _produtoRepository.GetByIdAsync(id));
     }
 
-    private ProdutoViewModel MapProdutoViewModel(Produto produto)
+    private ProdutoViewModel MapToProdutoViewModel(Produto produto)
     {
         return new ProdutoViewModel
         {
@@ -223,7 +235,7 @@ public class ProdutosController : Controller
         };
     }
 
-    private async Task<Produto> MapProduto(ProdutoViewModel produtoViewModel)
+    private async Task<Produto> MapToProduto(ProdutoViewModel produtoViewModel)
     {
         return new Produto
         {

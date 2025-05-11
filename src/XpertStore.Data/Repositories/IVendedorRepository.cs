@@ -5,5 +5,5 @@ namespace XpertStore.Data.Repositories;
 
 public interface IVendedorRepository
 {
-    Task<Vendedor?> GetByIdAsync(Guid id);
+    Task<Vendedor> GetByIdAsync(Guid id);
 }

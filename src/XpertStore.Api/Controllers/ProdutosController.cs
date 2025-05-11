@@ -49,7 +49,7 @@ public class ProdutosController : BaseApiController
         if (categoriaId == null)
             produtos.Where(p => p.Categoria.Id == categoriaId);
 
-        var produtosViewModel = _MapToProdutosViewModel(produtos);
+        var produtosViewModel = MapToProdutosViewModel(produtos);
 
         return Ok(produtosViewModel);
     }
@@ -94,21 +94,7 @@ public class ProdutosController : BaseApiController
             });
         }
 
-        var produto = _MapToProduto(produtoViewModel);
-
-        var categoria = await _categoriaRepository.GetByIdAsync(produtoViewModel.Categoria.Id);
-        if (categoria == null)
-        {
-            return Problem("Erro ao criar um produto, contate o suporte!");
-        }
-        produto.Categoria = categoria;
-
-        var vendedor = await _vendedorRepository.GetByIdAsync(UserId!.Value);
-        if (vendedor == null)
-        {
-            return Problem("Erro ao criar um produto, contate o suporte!");
-        }
-        produto.Vendedor = vendedor;
+        var produto = MapToProduto(produtoViewModel);
 
         var result = await _produtoRepository.CreateAsync(produto);
 
@@ -133,7 +119,7 @@ public class ProdutosController : BaseApiController
 
         try
         {
-            await _produtoRepository.UpdateAsync(_MapToProduto(produtoViewModel));
+            await _produtoRepository.UpdateAsync(MapToProduto(produtoViewModel));
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -171,24 +157,20 @@ public class ProdutosController : BaseApiController
         return NoContent();
     }
 
-    private IEnumerable<ProdutoViewModel> _MapToProdutosViewModel(IEnumerable<Produto> produtos)
+    private IEnumerable<ProdutoViewModel> MapToProdutosViewModel(IEnumerable<Produto> produtos)
     {
         var produtoViewModelList = new List<ProdutoViewModel>();
 
         foreach (var produto in produtos)
         {
-            produtoViewModelList.Add(_MapToProdutoViewModel(produto));
+            produtoViewModelList.Add(MapToProdutoViewModel(produto));
         }
 
         return produtoViewModelList;
     }
 
-    private ProdutoViewModel _MapToProdutoViewModel(Produto produto)
+    private ProdutoViewModel MapToProdutoViewModel(Produto produto)
     {
-        VendedorViewModel vendedor = _MapToVendedorViewModel(produto.Vendedor);
-
-        CategoriaViewModel categoria = _MapToCategoriaViewModel(produto.Categoria);
-
         return new ProdutoViewModel
         {
             Id = produto.Id,
@@ -197,12 +179,14 @@ public class ProdutosController : BaseApiController
             Imagem = produto.Imagem,
             Preco = produto.Preco,
             Estoque = produto.Estoque,
-            Categoria = categoria,
-            Vendedor = vendedor,
+            CategoriaId = produto.CategoriaId,
+            Categoria = MapToCategoriaViewModel(produto.Categoria),
+            VendedorId = produto.VendedorId,
+            Vendedor = MapToVendedorViewModel(produto.Vendedor),
         };
     }
 
-    private static CategoriaViewModel _MapToCategoriaViewModel(Categoria categoria)
+    private static CategoriaViewModel MapToCategoriaViewModel(Categoria categoria)
     {
         return new CategoriaViewModel()
         {
@@ -212,7 +196,7 @@ public class ProdutosController : BaseApiController
         };
     }
 
-    private static VendedorViewModel _MapToVendedorViewModel(Vendedor vendedor)
+    private static VendedorViewModel MapToVendedorViewModel(Vendedor vendedor)
     {
         return new VendedorViewModel()
         {
@@ -220,12 +204,8 @@ public class ProdutosController : BaseApiController
         };
     }
 
-    private Produto _MapToProduto(ProdutoViewModel produtoViewModel)
+    private Produto MapToProduto(ProdutoViewModel produtoViewModel)
     {
-        Vendedor vendedor = _MapToVendedor(produtoViewModel.Vendedor);
-
-        Categoria categoria = _MapToCategoria(produtoViewModel.Categoria);
-
         return new Produto
         {
             Id = produtoViewModel.Id,
@@ -234,12 +214,14 @@ public class ProdutosController : BaseApiController
             Imagem = produtoViewModel.Imagem,
             Preco = produtoViewModel.Preco,
             Estoque = produtoViewModel.Estoque,
-            Categoria = categoria,
-            Vendedor = vendedor,
+            CategoriaId = produtoViewModel.CategoriaId,
+            Categoria = MapToCategoria(produtoViewModel.Categoria),
+            VendedorId = produtoViewModel.VendedorId,
+            Vendedor = MapToVendedor(produtoViewModel.Vendedor)
         };
     }
 
-    private static Categoria _MapToCategoria(CategoriaViewModel categoriaViewModel)
+    private static Categoria MapToCategoria(CategoriaViewModel categoriaViewModel)
     {
         return new Categoria()
         {
@@ -248,8 +230,7 @@ public class ProdutosController : BaseApiController
             Descricao = categoriaViewModel.Descricao,
         };
     }
-
-    private static Vendedor _MapToVendedor(VendedorViewModel vendedorViewModel)
+    private static Vendedor MapToVendedor(VendedorViewModel vendedorViewModel)
     {
         return new Vendedor()
         {
