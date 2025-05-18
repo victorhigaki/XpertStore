@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using XpertStore.Api.Controllers.Base;
+using XpertStore.Api.Extensions;
 using XpertStore.Api.Models;
 using XpertStore.Data.Models;
 using XpertStore.Data.Models.Base;
@@ -12,21 +13,15 @@ namespace XpertStore.Api.Controllers;
 public class ProdutosController : BaseApiController
 {
     private readonly IProdutoRepository _produtoRepository;
-    private readonly ICategoriaRepository _categoriaRepository;
-    private readonly IVendedorRepository _vendedorRepository;
 
     protected Guid? UserId { get; set; } = null;
 
     public ProdutosController(
         IAppIdentityUser user,
-        IProdutoRepository produtoRepository,
-        ICategoriaRepository categoriaRepository,
-        IVendedorRepository vendedorRepository)
+        IProdutoRepository produtoRepository)
     {
         if (user.IsAuthenticated()) UserId = user.GetUserId();
         _produtoRepository = produtoRepository;
-        _categoriaRepository = categoriaRepository;
-        _vendedorRepository = vendedorRepository;
     }
 
     [AllowAnonymous]
@@ -44,12 +39,12 @@ public class ProdutosController : BaseApiController
         var produtos = await _produtoRepository.GetProdutosCategoriaVendedorAsync();
 
         if (!string.IsNullOrEmpty(categoria))
-            produtos.Where(p => p.Categoria.Descricao.Contains(categoria));
+            produtos = produtos.Where(p => p.Categoria.Descricao.Contains(categoria));
 
-        if (categoriaId == null)
-            produtos.Where(p => p.Categoria.Id == categoriaId);
+        if (categoriaId != null)
+            produtos = produtos.Where(p => p.Categoria.Id == categoriaId);
 
-        var produtosViewModel = MapToProdutosViewModel(produtos);
+        var produtosViewModel = MapToListProdutosViewModel(produtos);
 
         return Ok(produtosViewModel);
     }
@@ -65,7 +60,7 @@ public class ProdutosController : BaseApiController
             return NotFound();
         }
 
-        var produto = await _produtoRepository.GetProdutoCategoriaVendedorByIdAndUserIdAsync(id, UserId.Value);
+        var produto = await GetByIdAsync(id);
 
         if (produto == null)
         {
@@ -79,7 +74,7 @@ public class ProdutosController : BaseApiController
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesDefaultResponseType]
-    public async Task<ActionResult<ProdutoViewModel>> Post(ProdutoViewModel produtoViewModel)
+    public async Task<ActionResult> Post(ProdutoViewModel produtoViewModel)
     {
         if (_produtoRepository.IsNull())
         {
@@ -94,7 +89,23 @@ public class ProdutosController : BaseApiController
             });
         }
 
-        var produto = MapToProduto(produtoViewModel);
+        var imagemNome = Guid.NewGuid() + "_" + produtoViewModel.Imagem;
+
+        if (!FileExtension.UploadArquivoBase64(produtoViewModel.ImagemUpload, imagemNome, ModelState))
+        {
+            return BadRequest(produtoViewModel);
+        }
+
+        var produto = new Produto
+        {
+            Nome = produtoViewModel.Nome,
+            Descricao = produtoViewModel.Descricao,
+            Preco = produtoViewModel.Preco,
+            Estoque = produtoViewModel.Estoque,
+            CategoriaId = produtoViewModel.CategoriaId,
+            VendedorId = UserId.Value,
+            Imagem = imagemNome
+        };
 
         var result = await _produtoRepository.CreateAsync(produto);
 
@@ -112,14 +123,32 @@ public class ProdutosController : BaseApiController
 
         if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
-        if (produtoViewModel.Vendedor.Id != UserId)
+        var produto = await GetByIdAsync(id);
+
+        if (produto.Vendedor.Id != UserId)
         {
             return Unauthorized();
         }
 
+        if (produtoViewModel.ImagemUpload != null)
+        {
+            var imagemNome = Guid.NewGuid() + "_" + produtoViewModel.Imagem;
+            if (!FileExtension.UploadArquivoBase64(produtoViewModel.ImagemUpload, imagemNome, ModelState))
+            {
+                return BadRequest(produtoViewModel);
+            }
+            produto.Imagem = imagemNome;
+        }
+
+        produto.Nome = produtoViewModel.Nome;
+        produto.Descricao = produtoViewModel.Descricao;
+        produto.Preco = produtoViewModel.Preco;
+        produto.Estoque = produtoViewModel.Estoque;
+        produto.CategoriaId = produtoViewModel.CategoriaId;
+
         try
         {
-            await _produtoRepository.UpdateAsync(MapToProduto(produtoViewModel));
+            await _produtoRepository.UpdateAsync(produto);
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -157,7 +186,12 @@ public class ProdutosController : BaseApiController
         return NoContent();
     }
 
-    private IEnumerable<ProdutoViewModel> MapToProdutosViewModel(IEnumerable<Produto> produtos)
+    private async Task<Produto> GetByIdAsync(Guid id)
+    {
+        return await _produtoRepository.GetProdutoCategoriaVendedorByIdAndUserIdAsync(id);
+    }
+
+    private IEnumerable<ProdutoViewModel> MapToListProdutosViewModel(IEnumerable<Produto> produtos)
     {
         var produtoViewModelList = new List<ProdutoViewModel>();
 
@@ -180,9 +214,7 @@ public class ProdutosController : BaseApiController
             Preco = produto.Preco,
             Estoque = produto.Estoque,
             CategoriaId = produto.CategoriaId,
-            Categoria = MapToCategoriaViewModel(produto.Categoria),
-            VendedorId = produto.VendedorId,
-            Vendedor = MapToVendedorViewModel(produto.Vendedor),
+            Categoria = MapToCategoriaViewModel(produto.Categoria)
         };
     }
 
@@ -196,45 +228,5 @@ public class ProdutosController : BaseApiController
         };
     }
 
-    private static VendedorViewModel MapToVendedorViewModel(Vendedor vendedor)
-    {
-        return new VendedorViewModel()
-        {
-            Id = vendedor.Id,
-        };
-    }
 
-    private Produto MapToProduto(ProdutoViewModel produtoViewModel)
-    {
-        return new Produto
-        {
-            Id = produtoViewModel.Id,
-            Nome = produtoViewModel.Nome,
-            Descricao = produtoViewModel.Descricao,
-            Imagem = produtoViewModel.Imagem,
-            Preco = produtoViewModel.Preco,
-            Estoque = produtoViewModel.Estoque,
-            CategoriaId = produtoViewModel.CategoriaId,
-            Categoria = MapToCategoria(produtoViewModel.Categoria),
-            VendedorId = produtoViewModel.VendedorId,
-            Vendedor = MapToVendedor(produtoViewModel.Vendedor)
-        };
-    }
-
-    private static Categoria MapToCategoria(CategoriaViewModel categoriaViewModel)
-    {
-        return new Categoria()
-        {
-            Id = categoriaViewModel.Id,
-            Nome = categoriaViewModel.Nome,
-            Descricao = categoriaViewModel.Descricao,
-        };
-    }
-    private static Vendedor MapToVendedor(VendedorViewModel vendedorViewModel)
-    {
-        return new Vendedor()
-        {
-            Id = vendedorViewModel.Id,
-        };
-    }
 }

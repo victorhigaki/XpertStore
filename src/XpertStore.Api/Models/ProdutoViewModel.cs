@@ -18,8 +18,7 @@ public class ProdutoViewModel
 
     [NotMapped]
     [DisplayName("Imagem do Produto")]
-    public int ImagemUpload { get; set; }
-
+    public string ImagemUpload { get; set; }
 
     [DisplayName("Preço")]
     [Required(ErrorMessage = "Preencha o campo {0}!")]
@@ -33,8 +32,5 @@ public class ProdutoViewModel
 
     [Required(ErrorMessage = "Preencha o campo {0}!")]
     public Guid CategoriaId { get; set; }
-    public CategoriaViewModel Categoria { get; set; }
-
-    public Guid VendedorId { get; set; }
-    public VendedorViewModel Vendedor { get; set; }
+    public CategoriaViewModel? Categoria { get; set; }
 }
