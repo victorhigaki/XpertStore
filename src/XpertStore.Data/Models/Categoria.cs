@@ -1,8 +1,6 @@
-﻿using XpertStore.Data.Models.Base;
+﻿namespace XpertStore.Data.Models;
 
-namespace XpertStore.Data.Models;
-
-public class Categoria : BaseEntity
+public class Categoria
 {
     public Guid Id { get; set; }
     public string Nome { get; set; }

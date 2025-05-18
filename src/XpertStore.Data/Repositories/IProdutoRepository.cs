@@ -11,6 +11,6 @@ public interface IProdutoRepository
     Task<Produto> UpdateAsync(Produto entity);
     Task<Produto> DeleteAsync(Guid id);
     Task<IEnumerable<Produto>> GetProdutosCategoriaVendedorAsync();
-    Task<Produto> GetProdutoCategoriaVendedorByIdAndUserIdAsync(Guid id, Guid UserId);
+    Task<Produto> GetProdutoCategoriaVendedorByIdAndUserIdAsync(Guid id);
     bool Exists(Guid id);
 }

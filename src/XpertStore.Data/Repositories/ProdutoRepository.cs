@@ -33,12 +33,11 @@ public class ProdutoRepository : IProdutoRepository
         return produto;
     }
 
-    public async Task<Produto> GetProdutoCategoriaVendedorByIdAndUserIdAsync(Guid id, Guid UserId)
+    public async Task<Produto> GetProdutoCategoriaVendedorByIdAndUserIdAsync(Guid id)
     {
         var produto = await _context.Produtos
                                         .Include(p => p.Categoria)
                                         .Include(p => p.Vendedor)
-                                        .Where(p => p.VendedorId == UserId)
                                         .FirstOrDefaultAsync(p => p.Id == id);
         return produto;
     }

@@ -34,7 +34,4 @@ public class ProdutoViewModel
     [Required(ErrorMessage = "Preencha o campo {0}!")]
     public Guid CategoriaId { get; set; }
     public CategoriaViewModel? Categoria { get; set; }
-
-    public Guid VendedorId { get; set; }
-    public VendedorViewModel? Vendedor { get; set; }
 }

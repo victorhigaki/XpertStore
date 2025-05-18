@@ -2,10 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using XpertStore.Data.Data;
 using XpertStore.Data.Models;
 using XpertStore.Data.Models.Base;
 using XpertStore.Data.Repositories;
+using XpertStore.Mvc.Extensions;
 using XpertStore.Mvc.Models;
 
 namespace XpertStore.Mvc.Controllers;
@@ -54,7 +54,7 @@ public class ProdutosController : Controller
             return NotFound();
         }
 
-        var produtoViewModel = await GetProdutoById(id);
+        var produtoViewModel = await GetProdutoViewModelById(id);
 
         if (produtoViewModel == null)
         {
@@ -88,12 +88,22 @@ public class ProdutosController : Controller
         if (ModelState.IsValid)
         {
             var imgPrefixo = Guid.NewGuid() + "_";
-            if (!await UploadArquivo(produtoViewModel.ImagemUpload, imgPrefixo))
+            if (!await produtoViewModel.ImagemUpload!.UploadArquivo(imgPrefixo, ModelState))
             {
                 return View(produtoViewModel);
             }
-            Produto produto = await MapToProduto(produtoViewModel);
-            produto.Imagem = imgPrefixo + produtoViewModel.ImagemUpload.FileName;
+
+            Produto produto = new Produto
+            {
+                Id = produtoViewModel.Id,
+                Nome = produtoViewModel.Nome,
+                Descricao = produtoViewModel.Descricao,
+                Preco = produtoViewModel.Preco,
+                Estoque = produtoViewModel.Estoque,
+                CategoriaId = produtoViewModel.CategoriaId,
+                VendedorId = UserId,
+                Imagem = imgPrefixo + produtoViewModel.ImagemUpload!.FileName
+            };
 
             await _produtoRepository.CreateAsync(produto);
             return RedirectToAction(nameof(Index));
@@ -108,7 +118,7 @@ public class ProdutosController : Controller
             return NotFound();
         }
 
-        var produtoViewModel = await GetProdutoById(id.Value);
+        var produtoViewModel = await GetProdutoViewModelById(id.Value);
         if (produtoViewModel == null)
         {
             return NotFound();
@@ -126,18 +136,25 @@ public class ProdutosController : Controller
         {
             try
             {
+                var produto = await _produtoRepository.GetByIdAsync(id);
+                
+                produto.Nome = produtoViewModel.Nome;
+                produto.Descricao = produtoViewModel.Descricao;
+                produto.Preco = produtoViewModel.Preco;
+                produto.Estoque = produtoViewModel.Estoque;
+                produto.CategoriaId = produtoViewModel.CategoriaId;
+
                 if (produtoViewModel.ImagemUpload != null)
                 {
                     var imgPrefixo = Guid.NewGuid() + "_";
-                    if (!await UploadArquivo(produtoViewModel.ImagemUpload, imgPrefixo))
+                    if (!await produtoViewModel.ImagemUpload.UploadArquivo(imgPrefixo, ModelState))
                     {
                         return View(produtoViewModel);
                     }
 
-                    produtoViewModel.Imagem = imgPrefixo + produtoViewModel.ImagemUpload.FileName;
+                    produto.Imagem = imgPrefixo + produtoViewModel.ImagemUpload.FileName;
                 }
 
-                var produto = await MapToProduto(produtoViewModel);
                 await _produtoRepository.UpdateAsync(produto);
             }
             catch (DbUpdateConcurrencyException)
@@ -163,7 +180,7 @@ public class ProdutosController : Controller
             return NotFound();
         }
 
-        var produto = await GetProdutoById(id.Value);
+        var produto = await GetProdutoViewModelById(id.Value);
 
         if (produto == null)
         {
@@ -192,32 +209,14 @@ public class ProdutosController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    private async Task<bool> UploadArquivo(IFormFile arquivo, string imgPrefixo)
+    private async Task<ProdutoViewModel> GetProdutoViewModelById(Guid id)
     {
-        if (arquivo.Length <= 0) return false;
-
-        var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images", imgPrefixo + arquivo.FileName);
-
-        if (!Directory.Exists(Directory.GetCurrentDirectory() + "/wwwroot/images"))
-            Directory.CreateDirectory(Directory.GetCurrentDirectory() + "/wwwroot/images");
-
-        if (System.IO.File.Exists(path))
-        {
-            ModelState.AddModelError(string.Empty, "Já existe um arquivo com este nome!");
-            return false;
-        }
-
-        using (var stream = new FileStream(path, FileMode.Create))
-        {
-            await arquivo.CopyToAsync(stream);
-        }
-
-        return true;
+        return MapToProdutoViewModel(await GetProdutoById(id));
     }
 
-    private async Task<ProdutoViewModel> GetProdutoById(Guid id)
+    private async Task<Produto> GetProdutoById(Guid id)
     {
-        return MapToProdutoViewModel(await _produtoRepository.GetByIdAsync(id));
+        return await _produtoRepository.GetProdutoCategoriaVendedorByIdAndUserIdAsync(id);
     }
 
     private ProdutoViewModel MapToProdutoViewModel(Produto produto)
@@ -231,7 +230,16 @@ public class ProdutosController : Controller
             Preco = produto.Preco,
             Estoque = produto.Estoque,
             CategoriaId = produto.CategoriaId,
-            VendedorId = UserId,
+            Categoria = MapToCategoriaViewModel(produto.Categoria)
+        };
+    }
+
+    private CategoriaViewModel MapToCategoriaViewModel(Categoria categoria)
+    {
+        return new CategoriaViewModel
+        {
+            Nome = categoria.Nome,
+            Descricao = categoria.Descricao
         };
     }
 
