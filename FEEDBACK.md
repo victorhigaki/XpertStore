@@ -1,74 +1,94 @@
 # Feedback - Avaliação Geral
 
 ## Front End
+
 ### Navegação
   * Pontos positivos:
-    - Possui views e rotas definidas no projeto XpertStore.Mvc
-    - Implementação com Razor Pages/Views
-
-### Design
-    - Será avaliado na entrega final
-
-### Funcionalidade
-  * Pontos positivos:
-    - Implementação do CRUD para categorias e produtos
-    - Interface web implementada com Razor Pages/Views
-    - Uso de HTML/CSS para estilização básica
-## Back End
-### Arquitetura
-  * Pontos positivos:
-    - Estrutura em camadas bem definida na pasta src:
-      * XpertStore.Mvc
-      * XpertStore.Api
-      * XpertStore.Application
-      * XpertStore.Data
-      * XpertStore.Entity
-    - Separação clara de responsabilidades
+    - O projeto MVC implementa todas as rotas necessárias para autenticação, produtos e categorias.
+    - Navegação fluida e estrutura de views funcional.
 
   * Pontos negativos:
-    - Arquitetura mais complexa que o necessário com 6 camadas
-    - Recomendação: Deixar o arsenal técnico para desafios que exigem complexidade
-    - Mesmo com tamanha complexidade está injetando o contexto na controller e manipulando queries (não seria um problema se fosse uma arquitetura simples, mas não está fazendo sentido assim)
+    - Nenhum.
+
+### Design
+  - Interface simples, funcional e coerente com o escopo de um painel administrativo.
 
 ### Funcionalidade
   * Pontos positivos:
-    - Suporte a múltiplos bancos de dados (SQL Server / SQLite)
-    - Implementação de autenticação com Identity
-    - API RESTful documentada com Swagger
-    - Configuração de Seed de dados implementada
+    - CRUD completo para produtos e categorias em ambas as camadas (API e MVC).
+    - Implementação correta do Identity com autenticação JWT na API e Cookie no MVC.
+    - O vendedor é criado simultaneamente com o usuário no processo de registro, com ID compartilhado.
+    - Seed de dados, migrations e uso de SQLite implementados corretamente.
+
+  * Pontos negativos:
+    - Nenhum.
+
+## Back End
+
+### Arquitetura
+  * Pontos positivos:
+    - Arquitetura enxuta com três camadas: API, MVC e Data.
+    - Boa separação entre responsabilidades de apresentação, aplicação e persistência.
+
+  * Pontos negativos:
+    - A camada atualmente chamada `Data` abrange responsabilidades de negócio (ex: abstrações de usuário e domínio), sendo mais apropriado renomeá-la para `Core`.
+
+### Funcionalidade
+  * Pontos positivos:
+    - Registro de usuários e associação com vendedor funcionando corretamente.
+    - APIs protegidas por autenticação JWT.
+    - Migrations e seed executados no startup da aplicação.
+
+  * Pontos negativos:
+    - Nenhum.
 
 ### Modelagem
   * Pontos positivos:
-    - Uso do Entity Framework Core
-    - Modelos de dados na camada XpertStore.Entity
+    - Entidades simples e bem estruturadas.
+    - Validações adequadas e uso coerente de relacionamentos.
 
   * Pontos negativos:
-    - Modelagem mais complexa que o necessário com várias camadas
+    - Nenhum.
 
 ## Projeto
+
 ### Organização
   * Pontos positivos:
-    - Estrutura organizada com pasta src na raiz
-    - Arquivo solution (XpertStore.sln) na raiz
-    - Separação clara de projetos por responsabilidade
-    - Presença de .dockerignore indicando suporte a containerização
+    - Uso da pasta `src`, solution na raiz, estrutura clara e modular.
+    - README.md e FEEDBACK.md presentes e bem escritos.
+    - Separação lógica entre camadas respeitada.
+
+  * Pontos negativos:
+    - Nenhum.
 
 ### Documentação
   * Pontos positivos:
-    - README.md completo e bem estruturado com:
-      * Apresentação do projeto
-      * Tecnologias utilizadas
-      * Estrutura do projeto
-      * Instruções de execução
-      * Pré-requisitos
-    - Documentação da API via Swagger
-    - Instruções detalhadas de configuração e execução
+    - Documentação clara com instruções de uso.
+    - Swagger implementado e funcional para testes de API.
 
   * Pontos negativos:
-    - Arquivo FEEDBACK.md não encontrado
+    - Nenhum.
 
 ### Instalação
   * Pontos positivos:
-    - Suporte a múltiplos bancos (SQL Server / SQLite)
-    - Configuração de Seed de dados implementada
-    - Instruções claras de instalação no README
+    - SQLite corretamente configurado como provider local.
+    - Migrations e seed executados no startup sem dependências externas.
+
+  * Pontos negativos:
+    - Nenhum.
+
+---
+
+# 📊 Matriz de Avaliação de Projetos
+
+| **Critério**                   | **Peso** | **Nota** | **Resultado Ponderado**                  |
+|-------------------------------|----------|----------|------------------------------------------|
+| **Funcionalidade**            | 30%      | 10       | 3,0                                      |
+| **Qualidade do Código**       | 20%      | 10       | 2,0                                      |
+| **Eficiência e Desempenho**   | 20%      | 10       | 2,0                                      |
+| **Inovação e Diferenciais**   | 10%      | 10       | 1,0                                      |
+| **Documentação e Organização**| 10%      | 10       | 1,0                                      |
+| **Resolução de Feedbacks**    | 10%      | 10       | 1,0                                      |
+| **Total**                     | 100%     | -        | **10,0**                                 |
+
+## 🎯 **Nota Final: 10 / 10**
